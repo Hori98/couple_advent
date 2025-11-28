@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../hooks/useAuth';
 import { useRelationship } from '../hooks/useRelationship';
 import { supabase } from '../lib/supabase';
 import { jstDate, isDecemberJST } from '../constants/dates';
+import { CalendarGrid } from '../components/CalendarGrid';
+import { SnowParticles } from '../components/SnowParticles';
 
 const defaultTotal = 24;
 
@@ -43,34 +45,18 @@ export default function CalendarScreen() {
 
   return (
     <View className="flex-1 bg-christmas-night p-4">
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} pointerEvents="none">
+        <SnowParticles count={18} speed={1} />
+      </View>
       <Text className="text-white text-3xl font-bold mb-1">🎁 Advent Calendar</Text>
       <Text className="text-white/70 mb-2">JSTで今日まで開封できます</Text>
       {!relationshipId && (
         <Text className="text-red-300 mb-2">ペアリングが未完了です。戻って設定してください。</Text>
       )}
-      <FlatList
-        data={data}
-        keyExtractor={(item) => String(item.day)}
-        numColumns={4}
-        columnWrapperStyle={{ gap: 12 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            disabled={!item.unlocked}
-            style={{ flex: 1 / 4 }}
-            onPress={() => router.push(`/door/${item.day}`)}
-          >
-            <View
-              className={`aspect-square rounded-xl items-center justify-center ${
-                item.unlocked ? 'bg-white/90' : 'bg-white/10'
-              }`}
-            >
-              <Text className={`text-2xl font-bold ${item.unlocked ? 'text-christmas-red' : 'text-white/40'}`}>
-                {item.day}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
+      <CalendarGrid
+        totalDays={totalDays}
+        isUnlocked={isUnlocked}
+        onPressDay={(d) => router.push(`/door/${d}`)}
       />
     </View>
   );
