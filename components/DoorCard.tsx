@@ -10,22 +10,30 @@ type Props = {
 
 export function DoorCard({ day, unlocked, onPress }: Props) {
   const [opened, setOpened] = useState(false);
+  const [wobble, setWobble] = useState(0);
 
   return (
     <TouchableOpacity
       activeOpacity={0.9}
-      disabled={!unlocked}
       onPress={() => {
-        if (!opened) setOpened(true);
-        onPress?.();
+        if (unlocked) {
+          if (!opened) setOpened(true);
+          // optional haptics (if installed)
+          // @ts-ignore
+          import('expo-haptics').then((H) => H?.selectionAsync?.()).catch(() => {});
+          onPress?.();
+        } else {
+          setWobble((w) => w + 1);
+        }
       }}
       style={{ flex: 1 }}
     >
       <MotiView
-        from={{ rotateY: '0deg', scale: 1 }}
+        from={{ rotateY: '0deg', scale: 1, rotateZ: '0deg' }}
         animate={{
           rotateY: opened ? '-160deg' : '0deg',
           scale: opened ? 1.02 : 1,
+          rotateZ: wobble ? ['0deg', '-3deg', '3deg', '0deg'] : '0deg',
         }}
         transition={{ type: 'timing', duration: 500 }}
         style={{
@@ -60,4 +68,3 @@ export function DoorCard({ day, unlocked, onPress }: Props) {
     </TouchableOpacity>
   );
 }
-

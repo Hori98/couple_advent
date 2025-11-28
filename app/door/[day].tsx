@@ -4,6 +4,7 @@ import { View, Text, Image, TouchableOpacity, Linking, ActivityIndicator } from 
 import { useRelationship } from '../../hooks/useRelationship';
 import { useEntries, Entry } from '../../hooks/useEntries';
 import { getSignedUrl } from '../../lib/storage';
+import { GiftCard } from '../../components/GiftCard';
 
 export default function DoorDetail() {
   const router = useRouter();
@@ -60,9 +61,9 @@ export default function DoorDetail() {
       )}
 
       {entry.type === 'link' && entry.link_url && (
-        <TouchableOpacity onPress={() => Linking.openURL(entry.link_url!)} className="bg-white/10 px-4 py-3 rounded-xl mt-3">
-          <Text className="text-white">リンクを開く</Text>
-        </TouchableOpacity>
+        <View className="mt-3">
+          <GiftCard url={entry.link_url} />
+        </View>
       )}
 
       <TouchableOpacity onPress={() => router.back()} className="mt-6 bg-white/10 py-3 rounded-xl">
