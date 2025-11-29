@@ -59,7 +59,13 @@ export function useAuth() {
     setError(null);
     const { error: err } = await supabase.auth.signInAnonymously();
     if (err) {
-      setError(err.message);
+      // Friendlier guidance when anonymous provider is disabled
+      const msg = String(err.message || '');
+      if (msg.toLowerCase().includes('disabled')) {
+        setError('Anonymous sign-ins are disabled. Supabaseダッシュボードの Auth → Providers で Anonymous を有効化してください。');
+      } else {
+        setError(err.message);
+      }
       return false;
     }
     return true;
