@@ -56,6 +56,7 @@ export default function CalendarScreen() {
       <CalendarGrid
         totalDays={totalDays}
         isUnlocked={isUnlocked}
+        isToday={(d) => d === jstDate()}
         onPressDay={(d) => router.push(`/door/${d}`)}
       />
     </View>

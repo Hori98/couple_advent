@@ -5,10 +5,11 @@ import { MotiView } from 'moti';
 type Props = {
   day: number;
   unlocked: boolean;
+  isToday?: boolean;
   onPress?: () => void;
 };
 
-export function DoorCard({ day, unlocked, onPress }: Props) {
+export function DoorCard({ day, unlocked, isToday, onPress }: Props) {
   const [opened, setOpened] = useState(false);
   const [wobble, setWobble] = useState(0);
 
@@ -47,6 +48,20 @@ export function DoorCard({ day, unlocked, onPress }: Props) {
           shadowRadius: 8,
         }}
       >
+        {isToday && (
+          <MotiView
+            from={{ opacity: 0.3, scale: 0.96 }}
+            animate={{ opacity: 0.75, scale: 1 }}
+            transition={{ type: 'timing', duration: 1200, loop: true }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 16,
+              borderColor: 'rgba(245,158,11,0.6)',
+              borderWidth: 2,
+            }}
+          />
+        )}
         <View style={{
           position: 'absolute',
           top: 8,

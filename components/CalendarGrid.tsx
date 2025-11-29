@@ -5,12 +5,13 @@ import { DoorCard } from './DoorCard';
 type Props = {
   totalDays: number;
   isUnlocked: (day: number) => boolean;
+  isToday?: (day: number) => boolean;
   onPressDay: (day: number) => void;
   header?: React.ReactNode;
   footer?: React.ReactNode;
 };
 
-export function CalendarGrid({ totalDays, isUnlocked, onPressDay, header, footer }: Props) {
+export function CalendarGrid({ totalDays, isUnlocked, isToday, onPressDay, header, footer }: Props) {
   const data = useMemo(() => Array.from({ length: totalDays }, (_, i) => i + 1), [totalDays]);
 
   return (
@@ -24,7 +25,7 @@ export function CalendarGrid({ totalDays, isUnlocked, onPressDay, header, footer
         contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
         renderItem={({ item }) => (
           <View style={{ flex: 1 / 4 }}>
-            <DoorCard day={item} unlocked={isUnlocked(item)} onPress={() => onPressDay(item)} />
+            <DoorCard day={item} unlocked={isUnlocked(item)} isToday={isToday?.(item)} onPress={() => onPressDay(item)} />
           </View>
         )}
       />
@@ -32,4 +33,3 @@ export function CalendarGrid({ totalDays, isUnlocked, onPressDay, header, footer
     </View>
   );
 }
-

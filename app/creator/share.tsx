@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Alert, Share } from 'react-native';
 import { useRelationship } from '../../hooks/useRelationship';
 import { supabase } from '../../lib/supabase';
 
@@ -52,9 +52,20 @@ export default function CreatorShare() {
           <Text className="text-white">コード: <Text className="font-bold">{code}</Text></Text>
           <Text className="text-white mt-2">Deep Link:</Text>
           <Text className="text-white/80">{deeplink}</Text>
+          <View className="flex-row gap-3 mt-4">
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  await Share.share({ message: `アドベントカレンダー🎄\n${deeplink}` });
+                } catch {}
+              }}
+              className="bg-white/15 px-4 py-3 rounded-xl"
+            >
+              <Text className="text-white">共有</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </View>
   );
 }
-
