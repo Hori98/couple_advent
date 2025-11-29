@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
+import { useRelationship } from '../../hooks/useRelationship';
 
 const REL_KEY = 'relationship_id';
 
@@ -11,6 +12,7 @@ export default function CreatorSetup() {
   const [title, setTitle] = useState('');
   const [days, setDays] = useState<14 | 24 | 30>(24);
   const [saving, setSaving] = useState(false);
+  const { clear } = useRelationship();
 
   const create = async () => {
     try {
@@ -69,6 +71,31 @@ export default function CreatorSetup() {
       <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 12 }}>
         エラーが出る場合は、SupabaseのSQLで pgcrypto 拡張を有効化してください（create extension if not exists pgcrypto;）。
       </Text>
+
+      <View style={{ marginTop: 24, gap: 12 }}>
+        <TouchableOpacity
+          onPress={async () => {
+            try {
+              await supabase.auth.signOut();
+              await clear();
+              router.replace('/auth');
+            } catch {}
+          }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 12, borderRadius: 12 }}
+        >
+          <Text style={{ textAlign: 'center', color: '#fff' }}>サインアウト（開発用）</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={async () => {
+            try {
+              await clear();
+            } catch {}
+          }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.08)', paddingVertical: 12, borderRadius: 12 }}
+        >
+          <Text style={{ textAlign: 'center', color: '#fff' }}>関係IDをクリア（開発用）</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
