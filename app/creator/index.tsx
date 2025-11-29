@@ -16,6 +16,8 @@ export default function CreatorHome() {
   const [passcode, setPasscode] = useState('');
 
   useEffect(() => {
+    // 初期ロード中（null）のときはリダイレクトしない
+    if (relationshipId === null) return;
     if (!relationshipId) router.replace('/pair');
   }, [relationshipId, router]);
 
