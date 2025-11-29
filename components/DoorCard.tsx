@@ -18,9 +18,6 @@ export function DoorCard({ day, unlocked, onPress }: Props) {
       onPress={() => {
         if (unlocked) {
           if (!opened) setOpened(true);
-          // optional haptics (if installed)
-          // @ts-ignore
-          import('expo-haptics').then((H) => H?.selectionAsync?.()).catch(() => {});
           onPress?.();
         } else {
           setWobble((w) => w + 1);
