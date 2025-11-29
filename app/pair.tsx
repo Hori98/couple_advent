@@ -14,46 +14,41 @@ export default function PairScreen() {
     if (relationshipId) router.replace('/calendar');
   }, [relationshipId, router]);
 
-  if (!session) {
-    router.replace('/auth');
-    return null;
-  }
+  useEffect(() => {
+    if (!session) router.replace('/auth');
+  }, [session, router]);
 
   return (
-    <View className="flex-1 bg-christmas-night p-6">
-      <Text className="text-white text-3xl font-bold mb-1">🤝 ペアリング</Text>
-      <Text className="text-white/70 mb-4">招待コードで二人をつなげます</Text>
+    <View style={{ flex: 1, backgroundColor: '#0f172a', padding: 24 }}>
+      <Text style={{ color: '#fff', fontSize: 28, fontWeight: '800', marginBottom: 4 }}>🤝 ペアリング</Text>
+      <Text style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 16 }}>招待コードで二人をつなげます</Text>
 
-      <View className="bg-white/10 p-4 rounded-xl border border-white/10 mb-6">
-        <Text className="text-white mb-2">1) 招待コードを発行（作成者）</Text>
-        <TouchableOpacity disabled={loading} onPress={create} className="bg-christmas-green py-3 rounded-xl">
-          <Text className="text-center text-white font-semibold">招待コードを作成</Text>
+      <View style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 16 }}>
+        <Text style={{ color: '#fff', marginBottom: 8 }}>1) 招待コードを発行（作成者）</Text>
+        <TouchableOpacity disabled={loading} onPress={create} style={{ backgroundColor: '#16a34a', paddingVertical: 12, borderRadius: 12 }}>
+          <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>招待コードを作成</Text>
         </TouchableOpacity>
         {inviteCode && (
-          <Text className="text-white mt-3">招待コード: <Text className="font-bold">{inviteCode}</Text></Text>
+          <Text style={{ color: '#fff', marginTop: 12 }}>招待コード: <Text style={{ fontWeight: '700' }}>{inviteCode}</Text></Text>
         )}
       </View>
 
-      <View className="bg-white/10 p-4 rounded-xl border border-white/10">
-        <Text className="text-white mb-2">2) コードで参加（閲覧者）</Text>
+      <View style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+        <Text style={{ color: '#fff', marginBottom: 8 }}>2) コードで参加（閲覧者）</Text>
         <TextInput
           value={code}
           onChangeText={setCode}
           placeholder="コードを入力"
           placeholderTextColor="#94a3b8"
-          className="bg-white/10 text-white px-4 py-3 rounded-xl border border-white/20 mb-3"
+          style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', marginBottom: 12 }}
           autoCapitalize="characters"
         />
-        <TouchableOpacity
-          disabled={loading || !code}
-          onPress={() => join(code)}
-          className="bg-christmas-red py-3 rounded-xl"
-        >
-          <Text className="text-center text-white font-semibold">参加する</Text>
+        <TouchableOpacity disabled={loading || !code} onPress={() => join(code)} style={{ backgroundColor: '#e11d48', paddingVertical: 12, borderRadius: 12 }}>
+          <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>参加する</Text>
         </TouchableOpacity>
       </View>
 
-      {error && <Text className="text-red-300 mt-4">{error}</Text>}
+      {error && <Text style={{ color: '#fda4af', marginTop: 16 }}>{error}</Text>}
     </View>
   );
 }
