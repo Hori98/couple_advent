@@ -23,9 +23,7 @@ export default function AuthScreen() {
     if (ok) router.replace('/creator/setup');
   };
 
-  if (session) {
-    router.replace('/pair');
-  }
+  // Avoid auto-redirect loop; navigate only after explicit success
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#0f172a' }} behavior={Platform.select({ ios: 'padding', android: undefined })}>
