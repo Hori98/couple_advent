@@ -18,39 +18,40 @@ export default function Onboarding() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-christmas-night p-6">
-      <View className="items-center mt-12">
-        <Text className="text-4xl text-white font-bold">🎄 Couple Advent</Text>
-        <Text className="text-white/80 mt-3 text-center">
-          二人だけのアドベントカレンダーを作って、
-          毎日ひとつのワクワクを贈ろう。
+    <ScrollView style={{ flex: 1, backgroundColor: '#0f172a', padding: 24 }}>
+      <View style={{ alignItems: 'center', marginTop: 48 }}>
+        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '800' }}>🎄 Couple Advent</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.8)', marginTop: 12, textAlign: 'center' }}>
+          二人だけのアドベントカレンダーを作って、毎日ひとつのワクワクを贈ろう。
         </Text>
       </View>
 
-      <View className="mt-10 gap-4">
-        <View className="bg-white/10 rounded-2xl p-4 border border-white/10">
-          <Text className="text-white text-lg">✨ 14 / 24 / 30日の中から選択</Text>
-          <Text className="text-white/70 mt-1">当日まで開封ロック（JST）＆未開封は繰越OK</Text>
-        </View>
-        <View className="bg-white/10 rounded-2xl p-4 border border-white/10">
-          <Text className="text-white text-lg">💌 写真 / テキスト / リンク</Text>
-          <Text className="text-white/70 mt-1">旅行やギフトのURLも可愛く届けられる</Text>
-        </View>
-        <View className="bg-white/10 rounded-2xl p-4 border border-white/10">
-          <Text className="text-white text-lg">🔗 共有はワンタップ</Text>
-          <Text className="text-white/70 mt-1">受け取る側は未登録のまま開封できます</Text>
-        </View>
+      <View style={{ marginTop: 40 }}>
+        {[{
+          title: '✨ 14 / 24 / 30日の中から選択',
+          desc: '当日まで開封ロック（JST）＆未開封は繰越OK'
+        },{
+          title: '💌 写真 / テキスト / リンク',
+          desc: '旅行やギフトのURLも可愛く届けられる'
+        },{
+          title: '🔗 共有はワンタップ',
+          desc: '受け取る側は未登録のまま開封できます'
+        }].map((c, i) => (
+          <View key={i} style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 12 }}>
+            <Text style={{ color: '#fff', fontSize: 18 }}>{c.title}</Text>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>{c.desc}</Text>
+          </View>
+        ))}
       </View>
 
-      <View className="mt-10 gap-3">
-        <TouchableOpacity onPress={goCreate} className="bg-christmas-green py-4 rounded-2xl">
-          <Text className="text-center text-white text-lg font-semibold">アドベントを作る</Text>
+      <View style={{ marginTop: 40 }}>
+        <TouchableOpacity onPress={goCreate} style={{ backgroundColor: '#16a34a', paddingVertical: 16, borderRadius: 16 }}>
+          <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '700', fontSize: 16 }}>アドベントを作る</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={goOpen} className="bg-white/10 py-4 rounded-2xl">
-          <Text className="text-center text-white text-lg">共有リンクを開く</Text>
+        <TouchableOpacity onPress={goOpen} style={{ backgroundColor: 'rgba(255,255,255,0.1)', paddingVertical: 16, borderRadius: 16, marginTop: 12 }}>
+          <Text style={{ color: '#fff', textAlign: 'center', fontSize: 16 }}>共有リンクを開く</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
-

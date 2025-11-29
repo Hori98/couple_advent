@@ -28,48 +28,45 @@ export default function AuthScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-christmas-night"
-      behavior={Platform.select({ ios: 'padding', android: undefined })}
-    >
-      <View className="flex-1 items-center justify-center px-6">
-        <Text className="text-white text-4xl font-bold mb-2">🎄 Couple Advent</Text>
-        <Text className="text-white/70 mb-6">毎日にワクワクを。二人だけのカレンダー</Text>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#0f172a' }} behavior={Platform.select({ ios: 'padding', android: undefined })}>
+      <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 24 }}>
+        <Text style={{ color: '#fff', fontSize: 32, fontWeight: '800', marginBottom: 8 }}>🎄 Couple Advent</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 16 }}>毎日にワクワクを。二人だけのカレンダー</Text>
         <TextInput
           placeholder="メールアドレス"
           placeholderTextColor="#94a3b8"
           keyboardType="email-address"
           autoCapitalize="none"
-          className="w-full bg-white/10 text-white px-4 py-3 rounded-xl border border-white/20"
+          style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' }}
           value={email}
           onChangeText={setEmail}
         />
-        <TouchableOpacity onPress={onSend} className="mt-4 w-full bg-christmas-green py-3 rounded-xl">
-          <Text className="text-center text-white font-semibold">マジックリンクを送る</Text>
+        <TouchableOpacity onPress={onSend} style={{ marginTop: 12, width: '100%', backgroundColor: '#16a34a', paddingVertical: 12, borderRadius: 12 }}>
+          <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>マジックリンクを送る</Text>
         </TouchableOpacity>
         {emailSent && (
-          <View className="w-full mt-4">
-            <Text className="text-white/80 mb-2">メールに届いた6桁コードを入力</Text>
+          <View style={{ width: '100%', marginTop: 16 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.8)', marginBottom: 8 }}>メールに届いた6桁コードを入力</Text>
             <TextInput
               placeholder="123456"
               placeholderTextColor="#94a3b8"
               keyboardType="number-pad"
-              className="w-full bg-white/10 text-white px-4 py-3 rounded-xl border border-white/20"
+              style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' }}
               value={otp}
               onChangeText={setOtp}
             />
-            <TouchableOpacity onPress={onVerify} className="mt-3 w-full bg-white/20 py-3 rounded-xl">
-              <Text className="text-center text-white font-semibold">コードでログイン</Text>
+            <TouchableOpacity onPress={onVerify} style={{ marginTop: 12, width: '100%', backgroundColor: 'rgba(255,255,255,0.2)', paddingVertical: 12, borderRadius: 12 }}>
+              <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>コードでログイン</Text>
             </TouchableOpacity>
           </View>
         )}
-        <TouchableOpacity onPress={async () => { const ok = await signInAnonymously(); if (ok) router.replace('/pair'); }} className="mt-6 w-full bg-white/10 py-3 rounded-xl">
-          <Text className="text-center text-white">（開発用）匿名で入る</Text>
+        <TouchableOpacity onPress={async () => { const ok = await signInAnonymously(); if (ok) router.replace('/pair'); }} style={{ marginTop: 16, width: '100%', backgroundColor: 'rgba(255,255,255,0.1)', paddingVertical: 12, borderRadius: 12 }}>
+          <Text style={{ textAlign: 'center', color: '#fff' }}>（開発用）匿名で入る</Text>
         </TouchableOpacity>
         {emailSent && (
-          <Text className="text-green-300 mt-3">{emailSent} にメールを送りました</Text>
+          <Text style={{ color: '#86efac', marginTop: 12 }}>{emailSent} にメールを送りました</Text>
         )}
-        {error && <Text className="text-red-300 mt-3">{error}</Text>}
+        {error && <Text style={{ color: '#fda4af', marginTop: 12 }}>{error}</Text>}
       </View>
     </KeyboardAvoidingView>
   );
