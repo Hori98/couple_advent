@@ -17,14 +17,12 @@ export default function CreatorSetup() {
   const create = async () => {
     try {
       setSaving(true);
-      const { data: rel, error } = await supabase.rpc('create_relationship_and_join');
+      // Use single RPC to avoid RLS update issues and schema cache mismatches
+      const { data: rel, error } = await supabase.rpc('create_relationship_with_days', {
+        p_title: title,
+        p_total_days: days,
+      });
       if (error) throw error;
-      // set total_days and optional title
-      const { error: upErr } = await supabase
-        .from('relationships')
-        .update({ total_days: days, title: title || null })
-        .eq('id', rel.id);
-      if (upErr) throw upErr;
       await AsyncStorage.setItem(REL_KEY, rel.id);
       router.replace('/creator');
     } catch (e: any) {
