@@ -33,36 +33,42 @@ export default function CreatorSetup() {
   };
 
   return (
-    <View className="flex-1 bg-christmas-night p-6">
-      <Text className="text-white text-3xl font-bold mb-2">🎄 新しいアドベント</Text>
-      <Text className="text-white/70 mb-4">タイトルと日数を決めましょう</Text>
+    <View style={{ flex: 1, backgroundColor: '#0f172a', padding: 24 }}>
+      <Text style={{ color: '#fff', fontSize: 28, fontWeight: '800', marginBottom: 4 }}>🎄 新しいアドベント</Text>
+      <Text style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 16 }}>タイトルと日数を決めましょう</Text>
 
-      <Text className="text-white mb-2">タイトル（任意）</Text>
+      <Text style={{ color: '#fff', marginBottom: 8 }}>タイトル（任意）</Text>
       <TextInput
         value={title}
         onChangeText={setTitle}
         placeholder="例: 二人のクリスマス"
         placeholderTextColor="#94a3b8"
-        className="bg-white/10 text-white px-4 py-3 rounded-xl border border-white/20 mb-4"
+        style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', marginBottom: 16 }}
       />
 
-      <Text className="text-white mb-2">日数</Text>
-      <View className="flex-row gap-3 mb-6">
-        {[14, 24, 30].map((d) => (
-          <TouchableOpacity
-            key={d}
-            onPress={() => setDays(d as 14 | 24 | 30)}
-            className={`px-4 py-2 rounded-xl ${days === d ? 'bg-white' : 'bg-white/10'}`}
-          >
-            <Text className={days === d ? 'text-christmas-green font-semibold' : 'text-white'}>{d}日</Text>
-          </TouchableOpacity>
-        ))}
+      <Text style={{ color: '#fff', marginBottom: 8 }}>日数</Text>
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
+        {[14, 24, 30].map((d) => {
+          const active = days === d;
+          return (
+            <TouchableOpacity
+              key={d}
+              onPress={() => setDays(d as 14 | 24 | 30)}
+              style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}
+            >
+              <Text style={{ color: active ? '#16a34a' : '#fff', fontWeight: active ? '700' as const : '400' }}>{d}日</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
-      <TouchableOpacity disabled={saving} onPress={create} className="bg-christmas-green py-4 rounded-xl">
-        <Text className="text-center text-white font-semibold">{saving ? '作成中...' : '作成する'}</Text>
+      <TouchableOpacity disabled={saving} onPress={create} style={{ backgroundColor: '#16a34a', paddingVertical: 16, borderRadius: 12 }}>
+        <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>{saving ? '作成中...' : '作成する'}</Text>
       </TouchableOpacity>
+
+      <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 12 }}>
+        エラーが出る場合は、SupabaseのSQLで pgcrypto 拡張を有効化してください（create extension if not exists pgcrypto;）。
+      </Text>
     </View>
   );
 }
-
