@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { MotiView } from 'moti';
+import { AdventTheme } from '../constants/themes';
 
 type Props = {
   day: number;
   unlocked: boolean;
   isToday?: boolean;
+  theme?: AdventTheme;
   onPress?: () => void;
 };
 
-export function DoorCard({ day, unlocked, isToday, onPress }: Props) {
+export function DoorCard({ day, unlocked, isToday, onPress, theme }: Props) {
   const [opened, setOpened] = useState(false);
   const [wobble, setWobble] = useState(0);
 
@@ -39,9 +41,9 @@ export function DoorCard({ day, unlocked, isToday, onPress }: Props) {
           borderRadius: 16,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: unlocked ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.12)',
+          backgroundColor: unlocked ? (theme?.cardBgUnlocked ?? 'rgba(255,255,255,0.95)') : (theme?.cardBgLocked ?? 'rgba(255,255,255,0.12)'),
           borderWidth: 2,
-          borderColor: unlocked ? 'rgba(245,158,11,0.8)' : 'rgba(255,255,255,0.2)',
+          borderColor: unlocked ? (theme?.borderColor ?? 'rgba(245,158,11,0.8)') : 'rgba(255,255,255,0.2)',
           shadowColor: '#000',
           shadowOpacity: 0.2,
           shadowOffset: { width: 0, height: 4 },
@@ -57,7 +59,7 @@ export function DoorCard({ day, unlocked, isToday, onPress }: Props) {
               position: 'absolute',
               inset: 0,
               borderRadius: 16,
-              borderColor: 'rgba(245,158,11,0.6)',
+              borderColor: theme?.borderColor ?? 'rgba(245,158,11,0.6)',
               borderWidth: 2,
             }}
           />
@@ -66,7 +68,7 @@ export function DoorCard({ day, unlocked, isToday, onPress }: Props) {
           position: 'absolute',
           top: 8,
           right: 8,
-          backgroundColor: unlocked ? '#e11d48' : 'rgba(255,255,255,0.2)',
+          backgroundColor: unlocked ? (theme?.badgeBg ?? '#e11d48') : 'rgba(255,255,255,0.2)',
           paddingHorizontal: 8,
           paddingVertical: 4,
           borderRadius: 999,
@@ -74,7 +76,7 @@ export function DoorCard({ day, unlocked, isToday, onPress }: Props) {
           <Text style={{ color: unlocked ? '#fff' : '#cbd5e1', fontWeight: '700' }}>{day}</Text>
         </View>
         {!unlocked && (
-          <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Locked</Text>
+          <Text style={{ color: theme?.textMuted ?? 'rgba(255,255,255,0.5)', fontSize: 12 }}>Locked</Text>
         )}
       </MotiView>
     </TouchableOpacity>
