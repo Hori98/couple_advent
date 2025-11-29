@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function AuthScreen() {
   const router = useRouter();
-  const { signInWithOtp, verifyEmailOtp, signInAnonymously, emailSent, error, session } = useAuth();
+  const { signInWithOtp, verifyEmailOtp, signInAnonymously, emailSent, error } = useAuth();
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
 
@@ -20,7 +20,7 @@ export default function AuthScreen() {
   const onVerify = async () => {
     if (!email || !otp) return;
     const ok = await verifyEmailOtp(email, otp);
-    if (ok) router.replace('/pair');
+    if (ok) router.replace('/creator/setup');
   };
 
   if (session) {
@@ -60,7 +60,7 @@ export default function AuthScreen() {
             </TouchableOpacity>
           </View>
         )}
-        <TouchableOpacity onPress={async () => { const ok = await signInAnonymously(); if (ok) router.replace('/pair'); }} style={{ marginTop: 16, width: '100%', backgroundColor: 'rgba(255,255,255,0.1)', paddingVertical: 12, borderRadius: 12 }}>
+        <TouchableOpacity onPress={async () => { const ok = await signInAnonymously(); if (ok) router.replace('/creator/setup'); }} style={{ marginTop: 16, width: '100%', backgroundColor: 'rgba(255,255,255,0.1)', paddingVertical: 12, borderRadius: 12 }}>
           <Text style={{ textAlign: 'center', color: '#fff' }}>（開発用）匿名で入る</Text>
         </TouchableOpacity>
         {emailSent && (
