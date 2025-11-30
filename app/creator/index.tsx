@@ -7,6 +7,7 @@ import { LayoutFrame } from '../../components/LayoutFrame';
 import { AdventPreview } from '../../components/AdventPreview';
 import { ContentEditorModal } from '../../components/ContentEditorModal';
 import { useEntries } from '../../hooks/useEntries';
+import { getDrafts, saveDraft, deleteDraft, setPreviewSnapshot, DesignDraft } from '../../lib/drafts';
 
 function buildDays(n: number) { return Array.from({ length: n }, (_, i) => i + 1); }
 
@@ -29,6 +30,8 @@ export default function CreatorHome() {
   const [tmpStyle, setTmpStyle] = useState<string>('box_white');
   const [tmpDays, setTmpDays] = useState<number>(24);
   const [editDay, setEditDay] = useState<number | null>(null);
+  const [draftsOpen, setDraftsOpen] = useState(false);
+  const [drafts, setDrafts] = useState<DesignDraft[]>([]);
 
   useEffect(() => {
     // 初期ロード中（null）のときはリダイレクトしない
@@ -37,6 +40,7 @@ export default function CreatorHome() {
   }, [relationshipId, router]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => { (async () => setDrafts(await getDrafts()))(); }, []);
 
   const Header = null;
 
@@ -44,6 +48,21 @@ export default function CreatorHome() {
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <TouchableOpacity onPress={() => router.replace('/creator/setup')} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12 }}>
         <Text style={{ color: '#fff' }}>作り直す</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={async () => {
+          try {
+            await saveDraft({ background_key: tmpBackground, style_key: tmpStyle, total_days: tmpDays, title: null });
+            setDrafts(await getDrafts());
+            Alert.alert('一時保存しました');
+          } catch (e:any) { Alert.alert('一時保存に失敗しました', e.message); }
+        }}
+        style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12 }}
+      >
+        <Text style={{ color: '#fff' }}>一時保存</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setDraftsOpen(true)} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12 }}>
+        <Text style={{ color: '#fff' }}>下書き一覧</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push('/calendar?preview=1')} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12 }}>
         <Text style={{ color: '#fff' }}>プレビュー</Text>
@@ -179,6 +198,38 @@ export default function CreatorHome() {
                 <Text style={{ color: '#fff', textAlign: 'center' }}>キャンセル</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+      {/* 下書き一覧モーダル */}
+      <Modal visible={draftsOpen} transparent animationType="fade" onRequestClose={() => setDraftsOpen(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 }}>
+          <View style={{ backgroundColor: 'rgba(15,23,42,0.98)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', maxHeight: '80%' }}>
+            <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 8 }}>下書き一覧（最大3件）</Text>
+            {drafts.length === 0 ? (
+              <Text style={{ color: 'rgba(255,255,255,0.8)' }}>下書きはありません</Text>
+            ) : (
+              drafts.map((d) => (
+                <View key={d.id} style={{ paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)' }}>
+                  <Text style={{ color: '#fff' }}>{d.title || '無題'}</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>更新: {new Date(d.updated_at).toLocaleString()}</Text>
+                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                    <TouchableOpacity onPress={() => { setTmpBackground(d.background_key); setTmpStyle(d.style_key); setTmpDays(d.total_days); setDraftsOpen(false); }} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12 }}>
+                      <Text style={{ color: '#fff' }}>読み込み</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={async () => { await setPreviewSnapshot(d); setDraftsOpen(false); router.push('/calendar?preview=1'); }} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12 }}>
+                      <Text style={{ color: '#fff' }}>プレビュー</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={async () => { await deleteDraft(d.id); setDrafts(await getDrafts()); }} style={{ backgroundColor: 'rgba(239,68,68,0.9)', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12 }}>
+                      <Text style={{ color: '#fff' }}>削除</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            )}
+            <TouchableOpacity onPress={() => setDraftsOpen(false)} style={{ marginTop: 12, backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 10, borderRadius: 12 }}>
+              <Text style={{ color: '#fff', textAlign: 'center' }}>閉じる</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '../hooks/useAuth';
 import { useRelationship } from '../hooks/useRelationship';
 import { useEntries } from '../hooks/useEntries';
+import { getPreviewSnapshot, clearPreviewSnapshot } from '../lib/drafts';
 import { AdventPreview } from '../components/AdventPreview';
 import { supabase } from '../lib/supabase';
 import { jstDate, isDecemberJST } from '../constants/dates';
@@ -50,6 +51,20 @@ export default function CalendarScreen() {
   }, [relationshipId]);
 
   useEffect(() => { if (relationshipId) fetchAll(); }, [relationshipId, fetchAll]);
+
+  // Override with preview snapshot when in preview mode
+  useEffect(() => {
+    (async () => {
+      if (!preview) return;
+      const snap = await getPreviewSnapshot();
+      if (snap) {
+        setBackgroundKey(snap.background_key);
+        setStyleKey(snap.style_key);
+        setTotalDays(snap.total_days);
+        // keep snapshot for navigation back/forth; caller may clear later if needed
+      }
+    })();
+  }, [preview]);
 
   const data = useMemo(
     () => Array.from({ length: totalDays }, (_, i) => i + 1).map((d) => ({ day: d, unlocked: preview ? true : isUnlocked(d) })),
