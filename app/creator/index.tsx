@@ -32,15 +32,7 @@ export default function CreatorHome() {
     if (!relationshipId) router.replace('/pair');
   }, [relationshipId, router]);
 
-  const Header = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16 }}>
-      <View>
-        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>コンテンツ登録</Text>
-        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>プレビュー上の番号をタップして編集</Text>
-      </View>
-      <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>{totalDays} days</Text>
-    </View>
-  );
+  const Header = null;
 
   const Footer = (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -86,12 +78,6 @@ export default function CreatorHome() {
           totalDays={totalDays}
           onPressDay={(day) => router.push(`/creator/edit/${day}`)}
         />
-        {/* デザイン設定 FAB */}
-        <View style={{ position: 'absolute', right: 16, bottom: 16 }}>
-          <TouchableOpacity onPress={() => setDesignOpen(true)} style={{ backgroundColor: '#16a34a', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 999 }}>
-            <Text style={{ color: '#fff', fontWeight: '700' }}>デザイン</Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
       {/* デザイン設定モーダル */}
