@@ -5,12 +5,14 @@ import { useRelationship } from '../../hooks/useRelationship';
 import { supabase } from '../../lib/supabase';
 import { LayoutFrame } from '../../components/LayoutFrame';
 import { AdventPreview } from '../../components/AdventPreview';
+import { useEntries } from '../../hooks/useEntries';
 
 function buildDays(n: number) { return Array.from({ length: n }, (_, i) => i + 1); }
 
 export default function CreatorHome() {
   const router = useRouter();
   const { relationshipId } = useRelationship();
+  const { entries, fetchAll } = useEntries(relationshipId);
   const [linkCode, setLinkCode] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [totalDays, setTotalDays] = useState<number>(24);
@@ -32,6 +34,8 @@ export default function CreatorHome() {
     if (!relationshipId) router.replace('/pair');
   }, [relationshipId, router]);
 
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
   const Header = null;
 
   const Footer = (
@@ -39,7 +43,24 @@ export default function CreatorHome() {
       <TouchableOpacity onPress={() => router.replace('/creator/setup')} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12 }}>
         <Text style={{ color: '#fff' }}>作り直す</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => { setFinishOpen(true); setFinishStep('choice'); setFinishLink(null); }} style={{ backgroundColor: '#16a34a', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12 }}>
+      <TouchableOpacity
+        onPress={() => {
+          const filled = new Set(entries.map(e => e.day)).size;
+          if (filled < totalDays) {
+            Alert.alert(
+              '未登録のコンテンツがあります',
+              `登録済み: ${filled} / ${totalDays}\nこのまま共有を作成しますか？`,
+              [
+                { text: '戻る', style: 'cancel' },
+                { text: 'それでも作成', style: 'default', onPress: () => { setFinishOpen(true); setFinishStep('choice'); setFinishLink(null); } },
+              ]
+            );
+          } else {
+            setFinishOpen(true); setFinishStep('choice'); setFinishLink(null);
+          }
+        }}
+        style={{ backgroundColor: '#16a34a', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12 }}
+      >
         <Text style={{ color: '#fff', fontWeight: '700' }}>作成完了</Text>
       </TouchableOpacity>
     </View>
@@ -76,6 +97,7 @@ export default function CreatorHome() {
           backgroundKey={backgroundKey}
           styleKey={styleKey}
           totalDays={totalDays}
+          completedDays={entries.map(e => e.day)}
           onPressDay={(day) => router.push(`/creator/edit/${day}`)}
         />
       </View>

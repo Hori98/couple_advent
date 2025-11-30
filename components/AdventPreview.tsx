@@ -6,6 +6,7 @@ type Props = {
   styleKey: string; // e.g., number_box_v1
   totalDays: number; // 1..30
   onPressDay?: (day: number) => void;
+  completedDays?: number[]; // days that have content
 };
 
 const backgroundMap: Record<string, any> = {
@@ -21,7 +22,7 @@ const numberBoxMap: Record<string, any> = {
   number_box_v1: require('../assets/number_box_1.png'),
 };
 
-export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay }: Props) {
+export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, completedDays }: Props) {
   const [layout, setLayout] = useState({ w: 0, h: 0 });
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -74,6 +75,11 @@ export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay }
             <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}>
               <Text style={{ color: '#fff', fontWeight: '800', fontSize: Math.max(14, pos.size * 0.3), textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 4 }}>{i + 1}</Text>
             </View>
+            {completedDays?.includes(i + 1) && (
+              <View style={{ position: 'absolute', top: -6, right: -6, backgroundColor: '#16a34a', borderRadius: 999, paddingHorizontal: 6, paddingVertical: 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' }}>
+                <Text style={{ color: '#fff', fontWeight: '800', fontSize: Math.max(10, pos.size * 0.18) }}>✓</Text>
+              </View>
+            )}
           </Pressable>
         ))}
       </ImageBackground>
