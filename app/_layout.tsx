@@ -2,8 +2,11 @@ import { Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
+import { useFonts, Cinzel_600SemiBold } from '@expo-google-fonts/cinzel';
 
 export default function RootLayout() {
+  // Load decorative font (optional). App renders regardless; font applies when loaded.
+  useFonts({ Cinzel_600SemiBold });
   return (
     <View style={{ flex: 1, backgroundColor: '#0f172a' }}>
       <SafeAreaView style={{ flex: 1 }}>

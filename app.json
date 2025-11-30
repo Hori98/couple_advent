@@ -19,7 +19,8 @@
           "photosPermission": "写真を選択してコンテンツに使用します",
           "cameraPermission": "カメラを使用して写真を撮影します"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

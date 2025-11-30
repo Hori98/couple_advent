@@ -36,7 +36,7 @@ export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, 
   // Number rendering style toggle:
   // - Set to 'svg' for gold-outline + white fill via react-native-svg (default)
   // - Set to 'font' to render with a slim decorative font (see notes below)
-  const NUMBER_STYLE: 'svg' | 'font' = 'svg';
+  const NUMBER_STYLE: 'svg' | 'font' = 'font';
   // Note for 'font' mode:
   // - To try decorative fonts (Cinzel/Playfair/etc), install expo-font and load fonts at app root.
   // - Then set a fontFamily below (e.g., 'Cinzel_600SemiBold'). Keep this code path commented if not using expo-font.
@@ -117,7 +117,7 @@ export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, 
                   style={{
                     color: '#fff',
                     fontWeight: '600',
-                    // fontFamily: 'Cinzel_600SemiBold', // uncomment after loading fonts
+                    fontFamily: 'Cinzel_600SemiBold',
                     fontSize: Math.max(14, pos.size * 0.38),
                     textShadowColor: 'rgba(0,0,0,0.35)',
                     textShadowRadius: 3,
