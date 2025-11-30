@@ -45,6 +45,9 @@ export default function CreatorHome() {
       <TouchableOpacity onPress={() => router.replace('/creator/setup')} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12 }}>
         <Text style={{ color: '#fff' }}>作り直す</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/calendar')} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12 }}>
+        <Text style={{ color: '#fff' }}>プレビュー</Text>
+      </TouchableOpacity>
       <TouchableOpacity
         onPress={() => {
           const filled = new Set(entries.map(e => e.day)).size;

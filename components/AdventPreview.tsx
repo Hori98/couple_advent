@@ -97,9 +97,9 @@ export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, 
                     y={pos.size / 2}
                     fill="#ffffff"
                     stroke="#d4af37"
-                    strokeWidth={Math.max(1, pos.size * 0.035)}
-                    fontWeight="600"
-                    fontSize={Math.max(14, pos.size * 0.38)}
+                    strokeWidth={Math.max(0.5, pos.size * 0.03)}
+                    fontWeight="500"
+                    fontSize={Math.max(14, pos.size * 0.36)}
                     textAnchor="middle"
                     alignmentBaseline="middle"
                   >

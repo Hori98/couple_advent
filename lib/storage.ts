@@ -33,7 +33,7 @@ export async function uploadImageForDay(params: {
   mimeType?: string | null;
 }) {
   const { relationshipId, day, uri, base64, mimeType } = params;
-  let bytes: ArrayBuffer;
+  let bytes: Uint8Array;
   let ext = 'jpg';
   if (mimeType) {
     const guessed = mimeType.split('/')[1];
@@ -44,11 +44,12 @@ export async function uploadImageForDay(params: {
   }
 
   if (base64) {
-    bytes = base64ToBytes(base64).buffer;
+    bytes = base64ToBytes(base64);
   } else if (uri) {
     // fetch(uri) は一部環境で失敗することがあるため、base64を推奨
     const res = await fetch(uri);
-    bytes = await res.arrayBuffer();
+    const ab = await res.arrayBuffer();
+    bytes = new Uint8Array(ab);
   } else {
     throw new Error('No image data');
   }
@@ -56,9 +57,12 @@ export async function uploadImageForDay(params: {
   const fileName = `${Date.now()}.${ext}`;
   const path = `relationships/${relationshipId}/${day}/${fileName}`;
 
+  // React NativeではBlob経由が安定
+  const blob = new Blob([bytes], { type: mimeType || `image/${ext}` });
+
   const { error } = await supabase.storage
     .from('advent-media')
-    .upload(path, bytes as any, {
+    .upload(path, blob as any, {
       contentType: mimeType || `image/${ext}`,
       upsert: true,
     } as any);
