@@ -40,6 +40,7 @@
 - エラー/権限:
   - 画像選択（フォトライブラリ許可ダイアログ）
   - ネットワーク遮断時のメッセージ
+  - アニメーション（Lottie）: `npx expo install lottie-react-native` を実行して動作確認
 
 ## Store Submission
 - iOS: App Store Connect（スクリーンショット、App Privacy、Sign-in情報）
@@ -50,4 +51,3 @@
 - 画像圧縮（背景JPG・ボックスPNG最適化）
 - 不要アセットの削除（参照なし）
 - Hermes（デフォルト有効）
-
