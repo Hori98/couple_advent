@@ -3,7 +3,7 @@ import { ImageBackground, Image, Pressable, Text, View, LayoutChangeEvent } from
 
 type Props = {
   backgroundKey: string; // e.g., background_1, background_vertical_2
-  styleKey: string; // e.g., number_box_v1
+  styleKey: string; // e.g., box_red | box_green | box_white
   totalDays: number; // 1..30
   onPressDay?: (day: number) => void;
   completedDays?: number[]; // days that have content
@@ -18,9 +18,12 @@ const backgroundMap: Record<string, any> = {
   background_vertical_3: require('../assets/background_vertical_3.jpg'),
 };
 
-const numberBoxMap: Record<string, any> = {
-  number_box_v1: require('../assets/number_box_1.png'),
-};
+function colorForStyle(styleKey: string): string | null {
+  if (styleKey === 'box_red') return '#b91c1c';
+  if (styleKey === 'box_green') return '#166534';
+  if (styleKey === 'box_white') return 'rgba(255,255,255,0.92)';
+  return null;
+}
 
 export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, completedDays }: Props) {
   const [layout, setLayout] = useState({ w: 0, h: 0 });
@@ -31,7 +34,7 @@ export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, 
 
   const cols = 4;
   const rows = Math.ceil(Math.max(1, Math.min(30, totalDays)) / cols);
-  const icon = numberBoxMap[styleKey] ?? numberBoxMap.number_box_v1;
+  // icon-based stylesは廃止。未対応キーは白ボックスにフォールバック
 
   const boxes = useMemo(() => Array.from({ length: totalDays }, (_, i) => i + 1), [totalDays]);
 
@@ -71,7 +74,7 @@ export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, 
             style={{ position: 'absolute', left: pos.left, top: pos.top, width: pos.size, height: pos.size }}
             onPress={() => onPressDay?.(i + 1)}
           >
-            <Image source={icon} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+            <View style={{ width: '100%', height: '100%', borderRadius: 12, backgroundColor: colorForStyle(styleKey) ?? 'rgba(255,255,255,0.92)', borderWidth: 2, borderColor: 'rgba(255,255,255,0.85)' }} />
             <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}>
               <Text style={{ color: '#fff', fontWeight: '800', fontSize: Math.max(14, pos.size * 0.3), textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 4 }}>{i + 1}</Text>
             </View>

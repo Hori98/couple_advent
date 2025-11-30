@@ -10,7 +10,7 @@ export default function CreatorPreview() {
   const { relationshipId } = useRelationship();
   const [totalDays, setTotalDays] = useState(24);
   const [backgroundKey, setBackgroundKey] = useState('background_1');
-  const [styleKey, setStyleKey] = useState('number_box_v1');
+  const [styleKey, setStyleKey] = useState('box_white');
 
   useEffect(() => {
     (async () => {

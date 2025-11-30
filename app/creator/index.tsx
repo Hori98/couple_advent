@@ -17,7 +17,7 @@ export default function CreatorHome() {
   const [creating, setCreating] = useState(false);
   const [totalDays, setTotalDays] = useState<number>(24);
   const [backgroundKey, setBackgroundKey] = useState<string>('background_1');
-  const [styleKey, setStyleKey] = useState<string>('number_box_v1');
+  const [styleKey, setStyleKey] = useState<string>('box_white');
   const [savingDays, setSavingDays] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [finishOpen, setFinishOpen] = useState(false);
@@ -25,7 +25,7 @@ export default function CreatorHome() {
   const [finishLink, setFinishLink] = useState<string | null>(null);
   const [designOpen, setDesignOpen] = useState(false);
   const [tmpBackground, setTmpBackground] = useState<string>('background_1');
-  const [tmpStyle, setTmpStyle] = useState<string>('number_box_v1');
+  const [tmpStyle, setTmpStyle] = useState<string>('box_white');
   const [tmpDays, setTmpDays] = useState<number>(24);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function CreatorHome() {
           if (data.style_key) setStyleKey(data.style_key);
           setTmpDays(data.total_days ?? 24);
           setTmpBackground(data.background_key ?? 'background_1');
-          setTmpStyle(data.style_key ?? 'number_box_v1');
+          setTmpStyle(data.style_key ?? 'box_white');
         }
       } catch {}
     })();
@@ -120,12 +120,16 @@ export default function CreatorHome() {
             </View>
 
             <Text style={{ color: '#fff', marginBottom: 8 }}>スタイル</Text>
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-              {['number_box_v1'].map((k) => {
-                const active = tmpStyle === k;
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+              {[
+                { key: 'box_red', label: '赤ボックス' },
+                { key: 'box_green', label: '緑ボックス' },
+                { key: 'box_white', label: '白ボックス' },
+              ].map(({ key, label }) => {
+                const active = tmpStyle === key;
                 return (
-                  <TouchableOpacity key={k} onPress={() => setTmpStyle(k)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}>
-                    <Text style={{ color: active ? '#16a34a' : '#fff' }}>番号ボックス v1</Text>
+                  <TouchableOpacity key={key} onPress={() => setTmpStyle(key)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}>
+                    <Text style={{ color: active ? '#16a34a' : '#fff' }}>{label}</Text>
                   </TouchableOpacity>
                 );
               })}
