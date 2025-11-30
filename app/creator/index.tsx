@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, Share, Alert, TextInput, Modal 
 import { useRouter } from 'expo-router';
 import { useRelationship } from '../../hooks/useRelationship';
 import { supabase } from '../../lib/supabase';
+import { AdventCanvas } from '../../components/AdventCanvas';
 
 const days = Array.from({ length: 24 }, (_, i) => i + 1);
 
@@ -25,11 +26,19 @@ export default function CreatorHome() {
   }, [relationshipId, router]);
 
   return (
-    <View className="flex-1 bg-christmas-night p-4">
-      <Text className="text-white text-2xl font-bold mb-2">コンテンツ登録</Text>
-      <Text className="text-white/80 mb-3">編集したい日を選んでください</Text>
+    <View style={{ flex: 1, backgroundColor: '#0f172a', padding: 16 }}>
+      <Text style={{ color: '#fff', fontSize: 24, fontWeight: '800', marginBottom: 4 }}>コンテンツ登録</Text>
+      <Text style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>編集したい日を選んでください</Text>
 
-      <View className="flex-row gap-3 mb-4">
+      {/* AdventCanvas の仮当て込み（背景 + オーナメント1件） */}
+      <AdventCanvas
+        background={require('../../assets/christmas-tree_background.png')}
+        hotspots={[
+          { day: 1, x: 0.5 - 0.08, y: 0.35, w: 0.16, h: 0.16, icon: require('../../assets/christmas-decoration_1.png') },
+        ]}
+      />
+
+      <View style={{ flexDirection: 'row', gap: 12, marginTop: 16, marginBottom: 12 }}>
         {[14,24,30].map((d) => (
           <TouchableOpacity
             key={d}
@@ -50,11 +59,9 @@ export default function CreatorHome() {
                 setSavingDays(false);
               }
             }}
-            className={`px-4 py-2 rounded-xl ${totalDays === d ? 'bg-white' : 'bg-white/10'}`}
+            style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: totalDays === d ? '#fff' : 'rgba(255,255,255,0.1)' }}
           >
-            <Text className={totalDays === d ? 'text-christmas-green font-semibold' : 'text-white'}>
-              {d}日
-            </Text>
+            <Text style={{ color: totalDays === d ? '#16a34a' : '#fff', fontWeight: totalDays === d ? '700' as const : '400' }}>{d}日</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -82,14 +89,12 @@ export default function CreatorHome() {
             setCreating(false);
           }
         }}
-        className="mb-4 bg-christmas-red py-3 rounded-xl"
+        style={{ marginBottom: 12, backgroundColor: '#e11d48', paddingVertical: 12, borderRadius: 12 }}
       >
-        <Text className="text-center text-white font-semibold">
-          {creating ? '作成中...' : '共有リンクを発行してシェア'}
-        </Text>
+        <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>{creating ? '作成中...' : '共有リンクを発行してシェア'}</Text>
       </TouchableOpacity>
       {linkCode && (
-        <Text className="text-white/80 mb-2">コード: {linkCode}</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.8)', marginBottom: 8 }}>コード: {linkCode}</Text>
       )}
 
       <View className="bg-white/5 rounded-xl p-3 border border-white/10 mb-3">
@@ -113,8 +118,8 @@ export default function CreatorHome() {
         contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
         renderItem={({ item }) => (
           <TouchableOpacity style={{ flex: 1 / 4 }} onPress={() => router.push(`/creator/edit/${item}`)}>
-            <View className="aspect-square rounded-xl items-center justify-center bg-white/90">
-              <Text className="text-2xl font-bold text-christmas-green">{item}</Text>
+            <View style={{ aspectRatio: 1, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.9)' }}>
+              <Text style={{ fontSize: 20, fontWeight: '800', color: '#16a34a' }}>{item}</Text>
             </View>
           </TouchableOpacity>
         )}
