@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useRelationship } from '../../hooks/useRelationship';
 import { supabase } from '../../lib/supabase';
 import { AdventCanvas } from '../../components/AdventCanvas';
+import { LayoutFrame } from '../../components/LayoutFrame';
 
 const days = Array.from({ length: 24 }, (_, i) => i + 1);
 
@@ -25,20 +26,41 @@ export default function CreatorHome() {
     if (!relationshipId) router.replace('/pair');
   }, [relationshipId, router]);
 
+  const Header = (
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16 }}>
+      <View>
+        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>コンテンツ登録</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>編集したい日を選んでください</Text>
+      </View>
+      <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>{totalDays} days</Text>
+    </View>
+  );
+
+  const Footer = (
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+      <TouchableOpacity onPress={() => router.replace('/creator/setup')} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12 }}>
+        <Text style={{ color: '#fff' }}>作り直す</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => { setFinishOpen(true); setFinishStep('choice'); setFinishLink(null); }} style={{ backgroundColor: '#16a34a', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12 }}>
+        <Text style={{ color: '#fff', fontWeight: '700' }}>作成完了</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#0f172a', padding: 16 }}>
-      <Text style={{ color: '#fff', fontSize: 24, fontWeight: '800', marginBottom: 4 }}>コンテンツ登録</Text>
-      <Text style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>編集したい日を選んでください</Text>
+    <LayoutFrame header={Header} footer={Footer} backgroundColor="#0f172a">
 
       {/* AdventCanvas の仮当て込み（背景 + オーナメント1件） */}
-      <AdventCanvas
+      <View style={{ flex: 1 }}>
+        <AdventCanvas
         background={require('../../assets/christmas-tree_background.png')}
         hotspots={[
           { day: 1, x: 0.5 - 0.08, y: 0.35, w: 0.16, h: 0.16, icon: require('../../assets/christmas-decoration_1.png') },
         ]}
-      />
+        />
+      </View>
 
-      <View style={{ flexDirection: 'row', gap: 12, marginTop: 16, marginBottom: 12 }}>
+      <View style={{ flexDirection: 'row', gap: 12, marginTop: 12, marginBottom: 12 }}>
         {[14,24,30].map((d) => (
           <TouchableOpacity
             key={d}
@@ -66,36 +88,7 @@ export default function CreatorHome() {
         ))}
       </View>
 
-      <TouchableOpacity
-        disabled={creating || !relationshipId}
-        onPress={async () => {
-          if (!relationshipId) return;
-          try {
-            setCreating(true);
-            const { data, error } = await supabase.rpc('create_share_link', {
-              p_relationship: relationshipId,
-            });
-            if (error) throw error;
-            setLinkCode(data.code);
-            // Optionally set passcode if entered
-            if (passcode && passcode.length > 0) {
-              await supabase.rpc('set_share_link_passcode', { p_code: data.code, p_passcode: passcode });
-            }
-            const url = `coupleadvent://share/${data.code}`;
-            await Share.share({ message: `アドベントカレンダーが届きました🎄\n${url}` });
-          } catch (e: any) {
-            Alert.alert('共有リンクの作成に失敗しました', e.message);
-          } finally {
-            setCreating(false);
-          }
-        }}
-        style={{ marginBottom: 12, backgroundColor: '#e11d48', paddingVertical: 12, borderRadius: 12 }}
-      >
-        <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>{creating ? '作成中...' : '共有リンクを発行してシェア'}</Text>
-      </TouchableOpacity>
-      {linkCode && (
-        <Text style={{ color: 'rgba(255,255,255,0.8)', marginBottom: 8 }}>コード: {linkCode}</Text>
-      )}
+      {/* 共有してシェア（即時）は削除。完了モーダルからのみ共有 */}
 
       <View className="bg-white/5 rounded-xl p-3 border border-white/10 mb-3">
         <Text className="text-white mb-2">合言葉（任意・共有リンク保護）</Text>
@@ -126,11 +119,7 @@ export default function CreatorHome() {
       />
 
       {/* 作成完了フローティングボタン */}
-      <View style={{ position: 'absolute', right: 16, bottom: 24 }}>
-        <TouchableOpacity onPress={() => { setFinishOpen(true); setFinishStep('choice'); setFinishLink(null); }} style={{ backgroundColor: '#16a34a', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 16 }}>
-          <Text style={{ color: '#fff', fontWeight: '700' }}>作成完了</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Footerで完了ボタンを固定表示しているため削除 */}
 
       <Modal visible={finishOpen} transparent animationType="fade" onRequestClose={() => setFinishOpen(false)}>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 }}>
@@ -179,6 +168,9 @@ export default function CreatorHome() {
                 >
                   <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '700' }}>決定</Text>
                 </TouchableOpacity>
+                <TouchableOpacity onPress={() => setFinishStep('choice')} style={{ backgroundColor: 'rgba(255,255,255,0.1)', paddingVertical: 10, borderRadius: 12, marginTop: 8 }}>
+                  <Text style={{ color: '#fff', textAlign: 'center' }}>戻る</Text>
+                </TouchableOpacity>
               </View>
             )}
 
@@ -186,6 +178,7 @@ export default function CreatorHome() {
               <View>
                 <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 8 }}>共有リンク</Text>
                 <Text style={{ color: 'rgba(255,255,255,0.8)', marginBottom: 12 }}>{finishLink}</Text>
+                {/* コピーは後でexpo-clipboard導入時に対応。今は共有のみ */}
                 <TouchableOpacity onPress={async () => { if (finishLink) await Share.share({ message: `アドベントカレンダー🎄\n${finishLink}` }); }} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 12, borderRadius: 12, marginBottom: 8 }}>
                   <Text style={{ color: '#fff', textAlign: 'center' }}>共有</Text>
                 </TouchableOpacity>
@@ -197,6 +190,6 @@ export default function CreatorHome() {
           </View>
         </View>
       </Modal>
-    </View>
+    </LayoutFrame>
   );
 }

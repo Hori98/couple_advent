@@ -42,24 +42,27 @@ export function useEntries(relationshipId: string | null) {
 
   const upsert = useCallback(
     async (payload: Omit<Entry, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('advent_entries')
-        .upsert(payload as any)
-        .select('*')
-        .single();
+      const { data, error } = await supabase.rpc('upsert_advent_entry', {
+        p_relationship: payload.relationship_id,
+        p_day: payload.day,
+        p_type: payload.type,
+        p_text: payload.text_content,
+        p_image_path: payload.image_path,
+        p_youtube_url: payload.youtube_url,
+        p_link_url: (payload as any).link_url ?? null,
+      });
       if (error) throw error;
+      const entry = data as Entry;
       setEntries((prev) => {
-        const idx = prev.findIndex(
-          (e) => e.relationship_id === payload.relationship_id && e.day === payload.day
-        );
+        const idx = prev.findIndex((e) => e.relationship_id === entry.relationship_id && e.day === entry.day);
         if (idx >= 0) {
           const next = [...prev];
-          next[idx] = data as Entry;
+          next[idx] = entry;
           return next;
         }
-        return [...prev, data as Entry].sort((a, b) => a.day - b.day);
+        return [...prev, entry].sort((a, b) => a.day - b.day);
       });
-      return data as Entry;
+      return entry;
     },
     []
   );

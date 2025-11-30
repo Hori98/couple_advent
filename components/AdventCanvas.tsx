@@ -41,8 +41,9 @@ export function AdventCanvas({ background, hotspots }: Props) {
   }, [layout, hotspots]);
 
   return (
-    <View style={{ width: '100%', aspectRatio: 3/5, borderRadius: 16, overflow: 'hidden' }} onLayout={onLayout}>
-      <ImageBackground source={background} resizeMode="contain" style={{ flex: 1 }}>
+    <View style={{ width: '100%', borderRadius: 16, overflow: 'hidden', flex: 1 }} onLayout={onLayout}>
+      {/* 背景をより大きく表示: coverで全面、中心トリミング */}
+      <ImageBackground source={background} resizeMode="cover" style={{ flex: 1 }}>
         {positions.map((pos, i) => (
           <Pressable key={i} style={{ position: 'absolute', left: pos.left, top: pos.top, width: pos.width, height: pos.height }} onPress={() => {
             setOpenIdx(i);
@@ -50,6 +51,10 @@ export function AdventCanvas({ background, hotspots }: Props) {
           }}>
             <MotiView from={{ scale: 1 }} animate={{ scale: 1 }} transition={{ type: 'timing', duration: 300 }} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <Image source={hotspots[i].icon} style={{ width: pos.width, height: pos.height }} resizeMode="contain" />
+              {/* 日付番号バッジ */}
+              <View style={{ position: 'absolute', top: -8, right: -8, backgroundColor: '#e11d48', borderRadius: 12, paddingHorizontal: 6, paddingVertical: 2 }}>
+                <Text style={{ color: '#fff', fontWeight: '700' }}>{hotspots[i].day}</Text>
+              </View>
             </MotiView>
           </Pressable>
         ))}
@@ -67,4 +72,3 @@ export function AdventCanvas({ background, hotspots }: Props) {
     </View>
   );
 }
-

@@ -9,20 +9,18 @@ export async function uploadImageForDay(params: {
 }) {
   const { relationshipId, day, uri } = params;
   const res = await fetch(uri);
-  const blob = await res.blob();
-
-  const ext = (blob.type && blob.type.split('/')[1]) || uri.split('.').pop() || 'jpg';
+  const arrayBuffer = await res.arrayBuffer();
+  const ext = uri.split('.').pop() || 'jpg';
   const fileName = `${Date.now()}.${ext}`;
   const path = `relationships/${relationshipId}/${day}/${fileName}`;
 
   const { error } = await supabase.storage
     .from('advent-media')
-    .upload(path, blob as any, {
-      contentType: blob.type || 'image/jpeg',
+    // RN環境ではArrayBufferアップロードが安定
+    .upload(path, arrayBuffer as any, {
+      contentType: `image/${ext}`,
       upsert: true,
-      // Newer SDKs support metadata; harmless if ignored.
-      // @ts-ignore - metadata may not exist on older versions
-      metadata: { relationship_id: relationshipId, day },
+      // パスベースのRLSに切替済みのためmetadataは不要
     } as any);
 
   if (error) throw error;
@@ -36,4 +34,3 @@ export async function getSignedUrl(path: string, expiresIn = 60 * 60) {
   if (error) throw error;
   return data.signedUrl;
 }
-
