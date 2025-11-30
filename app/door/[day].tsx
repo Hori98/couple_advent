@@ -5,10 +5,11 @@ import { useRelationship } from '../../hooks/useRelationship';
 import { useEntries, Entry } from '../../hooks/useEntries';
 import { getSignedUrl } from '../../lib/storage';
 import { GiftCard } from '../../components/GiftCard';
+import { supabase } from '../../lib/supabase';
 
 export default function DoorDetail() {
   const router = useRouter();
-  const { day } = useLocalSearchParams<{ day: string }>();
+  const { day, preview } = useLocalSearchParams<{ day: string; preview?: string }>();
   const dayNumber = useMemo(() => Number(day), [day]);
   const { relationshipId } = useRelationship();
   const { getByDay } = useEntries(relationshipId);
@@ -26,8 +27,14 @@ export default function DoorDetail() {
           setSignedUrl(url);
         } catch {}
       }
+      // Log open event unless in preview mode
+      try {
+        if (!preview && relationshipId) {
+          await supabase.rpc('log_open_event', { p_relationship: relationshipId, p_day: dayNumber });
+        }
+      } catch {}
     })();
-  }, [relationshipId, dayNumber, getByDay]);
+  }, [relationshipId, dayNumber, getByDay, preview]);
 
   if (!entry) {
     return (

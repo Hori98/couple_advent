@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { View, Text } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '../hooks/useAuth';
 import { useRelationship } from '../hooks/useRelationship';
 import { supabase } from '../lib/supabase';
@@ -19,13 +19,14 @@ function isUnlocked(day: number) {
 
 export default function CalendarScreen() {
   const router = useRouter();
+  const { preview } = useLocalSearchParams<{ preview?: string }>();
   const { session } = useAuth();
   const { relationshipId } = useRelationship();
   const [totalDays, setTotalDays] = useState<number>(defaultTotal);
   const [themeName, setThemeName] = useState<string>('');
 
   useEffect(() => {
-    if (!session) router.replace('/auth');
+    if (!session && !preview) router.replace('/auth');
   }, [session, router]);
 
   useEffect(() => {
@@ -42,8 +43,8 @@ export default function CalendarScreen() {
   }, [relationshipId]);
 
   const data = useMemo(
-    () => Array.from({ length: totalDays }, (_, i) => i + 1).map((d) => ({ day: d, unlocked: isUnlocked(d) })),
-    [totalDays]
+    () => Array.from({ length: totalDays }, (_, i) => i + 1).map((d) => ({ day: d, unlocked: preview ? true : isUnlocked(d) })),
+    [totalDays, preview]
   );
 
   const theme = pickTheme(totalDays);
@@ -60,10 +61,10 @@ export default function CalendarScreen() {
       )}
       <CalendarGrid
         totalDays={totalDays}
-        isUnlocked={isUnlocked}
-        isToday={(d) => d === jstDate()}
+        isUnlocked={(d) => (preview ? true : isUnlocked(d))}
+        isToday={(d) => (preview ? false : d === jstDate())}
         theme={theme}
-        onPressDay={(d) => router.push(`/door/${d}`)}
+        onPressDay={(d) => router.push(preview ? `/door/${d}?preview=1` : `/door/${d}`)}
       />
     </View>
   );
