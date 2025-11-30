@@ -5,13 +5,13 @@
 - Ship a lightweight, demoable “full-view grid + open animation” first; refine visuals and content later.
 
 ## Scope (MVP – Creator first)
-- Creator flow only (Receiver/anonymous later).
-- Minimal settings: title + days (14/24/30).
-- Content types (mock-first): text, image, link (video next).
-- Share link with optional passcode. Receiver UX later.
+- Creator優先（受け手は共有リンク→匿名認証→カレンダー閲覧）
+- 設定: タイトル + 日数（14/24/30）+ 背景 + スタイル（赤/緑/白）
+- コンテンツ種別: text / image / youtube / link（videoは後続）
+- 共有リンク（任意の合言葉付き）
 
 ## User Flow (Creator)
-- Onboarding → Auth (email + 6‑digit OTP) → Setup (title + days) → Creator Calendar (grid) → Edit Day → Share link
+- Onboarding → Auth (email + 6‑digit OTP) → Setup（タイトル/背景/スタイル/日数）→ Creator（フルプレビュー）→ モーダルで日別編集 → 共有リンク
 - Return visits jump directly to Creator Calendar.
 
 ## Screens & Routes
@@ -22,9 +22,9 @@
 - `/(creator)/edit/[day]`: text/image/link (mock-capable); save.
 - `/(creator)/share`: create link, optional passcode, copy/share.
 
-## Lightweight Build (no heavy assets first)
-- Background: gradient (night) + simple dots (snow) → later swap to image.
-- Doors: rounded cards with gold-ish stroke via styles → later swap to PNG frames.
+## Visual Build（現状）
+- Background: 画像（`background_*` / `background_vertical_*`）
+- Boxes: 画像（`box_red/green/white`）+ 数字（SVG金縁+白塗り、またはフォント）
 - Animations: Moti + Reanimated (scale + rotateY) for open; locked wobble for future days.
 - Content: mock data stub for text/image/link; switch to Supabase later.
 
@@ -83,4 +83,3 @@
 - Asset direction: pick 1 background, 1 door frame, 1 snow asset first.
 - Font: optional rounded/handwritten later (Expo Font).
 - Receiver: anonymous claim screen polish after Creator MVP.
-

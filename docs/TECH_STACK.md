@@ -6,7 +6,7 @@
 - UI: NativeWind (Tailwind for RN)
 - Animation: Moti + React Native Reanimated
 - Backend: Supabase (Auth, Postgres, Storage)
-- Icons: Lucide React Native
+- Vector: react-native-svg（数字描画に使用）
 
 ## Config / Env
 - `.env` (Expo reads EXPO_PUBLIC_*):
@@ -16,23 +16,24 @@
 
 ## Routes (current)
 - `/auth`: Magic link (creator)
-- `/pair`: Pairing/relationship setup (creator path)
-- `/creator`: Edit menu + share link button + total days switch
-- `/creator/edit/[day]`: Door editing (text/image/youtube)
-- `/calendar`: Calendar view (JST unlock; uses relationship.total_days)
-- `/door/[day]`: Content view
-- `/share/[code]`: Receiver entry; anonymous auth + claim link → calendar
+- `/creator/setup`: タイトル/背景/スタイル/日数を選んで作成（ライブプレビュー付き）
+- `/creator`: フルサイズプレビュー＋番号タップで編集モーダル。作成完了→共有
+- `/creator/share`: 共有リンク（必要に応じて使用）
+- `/calendar`: 受け手のカレンダー（JSTアンロック）
+- `/door/[day]`: 受け手の詳細表示（署名URLで画像表示）
+- `/share/[code]`: 受け手の入口（匿名認証 + claim → `/calendar`）
 
 ## Data Model (key tables)
-- `relationships`: id, invite_code, created_by, total_days
+- `relationships`: id, invite_code, created_by, title, total_days, background_key, style_key
 - `relationship_members`: relationship_id, user_id, role
-- `advent_entries`: relationship_id, day, type(text/image/youtube), text_content, image_path, youtube_url
-- `share_links`: relationship_id, code, claimed_by, expires_at, disabled
+- `advent_entries`: relationship_id, day, type(text/image/youtube/link/video), text_content, image_path, youtube_url, link_url
+- `share_links`: relationship_id, code, claimed_by, expires_at, disabled, passcode_hash
 
 ## Security (RLS)
-- Members can read entries; creators can write.
-- Receivers (claimed_by) can read entries + storage by relationship.
-- Storage: private bucket `advent-media`, reads via signed URL only.
+- 非再帰`is_member/is_creator`ヘルパーでポリシー構成。
+- メンバーはentriesを読める／作成者は書ける。
+- 受け手（claimed_by）は該当関係のentries/Storageを読める（必要に応じてORポリシー）。
+- Storage: private `advent-media`、パスベースRLS（`relationships/{rel}/{day}/...`）＋署名URL。
 
 ## Auth Modes
 - Creator: Email magic link (later Apple/Google); writes content.
@@ -42,4 +43,3 @@
 - Content: `video`, `link` types; gift card UI; OG previews.
 - Security: passcode-protected share, device bind, audit/open logs.
 - Polish: richer door animations, particles, sound.
-

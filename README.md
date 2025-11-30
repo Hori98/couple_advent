@@ -25,18 +25,23 @@ Couple Advent (Expo + Supabase)
 - Web: press `w` (limited)
 
 ## First Run: Supabase Setup (done once)
-1) Apply SQL in `supabase/schema.sql` (tables, RLS, RPC)
-2) Add the share link SQL (see conversation or extend from schema)
-3) Create private Storage bucket `advent-media`
-4) Auth Providers: enable Email (magic link) + Anonymous
+1) Apply SQL in `supabase/schema.sql`（基本スキーマ/RLS/RPC）
+2) 追加パッチを適用（必要に応じて）
+   - `supabase/patch_2025_11_28.sql`（link/video型・共有パスコード）
+   - `supabase/patch_2025_11_30_rls_non_recursive.sql`（非再帰RLS + StorageパスRLS）
+   - `supabase/patch_2025_11_30_relationship_days.sql`（title/total_days/background_key/style_key + 作成RPC）
+   - `supabase/patch_2025_12_01_share_links.sql`（共有リンク作成のgen_random_bytes修正）
+3) Storageバケットを作成: private `advent-media`
+4) Auth Providers: Email（Magic Link）+ Anonymous を有効化
 
 ## Test Flow
-1) Creator: open `/auth` → sign in → `/pair` → `/creator`
-2) Set total days (14/24/30), add content for some days
-3) Tap “共有リンクを発行してシェア” → send the deep link
-4) Receiver: open the link → `/share/[code]` claims → `/calendar`
-5) Tap a door: content appears; images use signed URLs
+1) Creator: `/auth` → サインイン → `/creator/setup`
+2) 作成画面で タイトル/背景/スタイル/日数 を選択 → プレビュー確認 → 作成 → `/creator`
+3) クリエイター画面のプレビュー上で番号タップ → 編集モーダルで保存（テキスト/画像/YouTube/リンク）
+4) 作成完了（不足があれば警告表示）→ 共有リンク発行（合言葉設定は任意）
+5) Receiver: 共有リンクを開く → `/share/[code]` で匿名認証 + claim → `/calendar` → ドアを開く
 
 ## Notes
-- Storage uploads attach metadata `{ relationship_id, day }` for RLS.
-- JST unlock and carryover handled client-side for MVP.
+- Storage RLSはパスベース（`relationships/{relationship_id}/{day}/...`）。フロントはこの規約でアップロード。
+- 画像アップロードはRN環境向けにbase64を使用。
+- アンロック（JST）はMVPとしてクライアント側で制御。

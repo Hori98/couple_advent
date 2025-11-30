@@ -5,6 +5,7 @@ import { useRelationship } from '../../hooks/useRelationship';
 import { supabase } from '../../lib/supabase';
 import { LayoutFrame } from '../../components/LayoutFrame';
 import { AdventPreview } from '../../components/AdventPreview';
+import { ContentEditorModal } from '../../components/ContentEditorModal';
 import { useEntries } from '../../hooks/useEntries';
 
 function buildDays(n: number) { return Array.from({ length: n }, (_, i) => i + 1); }
@@ -27,6 +28,7 @@ export default function CreatorHome() {
   const [tmpBackground, setTmpBackground] = useState<string>('background_1');
   const [tmpStyle, setTmpStyle] = useState<string>('box_white');
   const [tmpDays, setTmpDays] = useState<number>(24);
+  const [editDay, setEditDay] = useState<number | null>(null);
 
   useEffect(() => {
     // 初期ロード中（null）のときはリダイレクトしない
@@ -98,7 +100,7 @@ export default function CreatorHome() {
           styleKey={styleKey}
           totalDays={totalDays}
           completedDays={entries.map(e => e.day)}
-          onPressDay={(day) => router.push(`/creator/edit/${day}`)}
+          onPressDay={(day) => setEditDay(day)}
         />
       </View>
 
@@ -177,6 +179,18 @@ export default function CreatorHome() {
           </View>
         </View>
       </Modal>
+
+      {/* コンテンツ編集モーダル */}
+      {relationshipId && (
+        <ContentEditorModal
+          visible={editDay != null}
+          onClose={() => setEditDay(null)}
+          relationshipId={relationshipId}
+          day={editDay ?? 1}
+          load={async (d) => entries.find(e => e.day === d) ?? (await (async () => { return null; })())}
+          onSaved={() => fetchAll()}
+        />
+      )}
       {/* 作成完了フローティングボタン */}
       {/* Footerで完了ボタンを固定表示しているため削除 */}
 

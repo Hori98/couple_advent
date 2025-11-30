@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { ImageBackground, Image, Pressable, Text, View, LayoutChangeEvent } from 'react-native';
+import Svg, { Text as SvgText } from 'react-native-svg';
 
 type Props = {
   backgroundKey: string; // e.g., background_1, background_vertical_2
@@ -18,6 +19,12 @@ const backgroundMap: Record<string, any> = {
   background_vertical_3: require('../assets/background_vertical_3.jpg'),
 };
 
+const boxImageMap: Record<string, any> = {
+  box_red: require('../assets/box_red.png'),
+  box_green: require('../assets/box_green.png'),
+  box_white: require('../assets/box_white.png'),
+};
+
 function colorForStyle(styleKey: string): string | null {
   if (styleKey === 'box_red') return '#b91c1c';
   if (styleKey === 'box_green') return '#166534';
@@ -26,6 +33,13 @@ function colorForStyle(styleKey: string): string | null {
 }
 
 export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, completedDays }: Props) {
+  // Number rendering style toggle:
+  // - Set to 'svg' for gold-outline + white fill via react-native-svg (default)
+  // - Set to 'font' to render with a slim decorative font (see notes below)
+  const NUMBER_STYLE: 'svg' | 'font' = 'svg';
+  // Note for 'font' mode:
+  // - To try decorative fonts (Cinzel/Playfair/etc), install expo-font and load fonts at app root.
+  // - Then set a fontFamily below (e.g., 'Cinzel_600SemiBold'). Keep this code path commented if not using expo-font.
   const [layout, setLayout] = useState({ w: 0, h: 0 });
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -74,9 +88,44 @@ export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, 
             style={{ position: 'absolute', left: pos.left, top: pos.top, width: pos.size, height: pos.size }}
             onPress={() => onPressDay?.(i + 1)}
           >
-            <View style={{ width: '100%', height: '100%', borderRadius: 12, backgroundColor: colorForStyle(styleKey) ?? 'rgba(255,255,255,0.92)', borderWidth: 2, borderColor: 'rgba(255,255,255,0.85)' }} />
+            <Image source={boxImageMap[styleKey] ?? boxImageMap.box_white} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
             <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ color: '#fff', fontWeight: '800', fontSize: Math.max(14, pos.size * 0.3), textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 4 }}>{i + 1}</Text>
+              {NUMBER_STYLE === 'svg' ? (
+                <Svg width={pos.size} height={pos.size}>
+                  <SvgText
+                    x={pos.size / 2}
+                    y={pos.size / 2}
+                    fill="#ffffff"
+                    stroke="#d4af37"
+                    strokeWidth={Math.max(1, pos.size * 0.035)}
+                    fontWeight="600"
+                    fontSize={Math.max(14, pos.size * 0.38)}
+                    textAnchor="middle"
+                    alignmentBaseline="middle"
+                  >
+                    {String(i + 1)}
+                  </SvgText>
+                </Svg>
+              ) : (
+                // Font-based slim number (toggle NUMBER_STYLE to 'font').
+                // For decorative fonts: install and load via expo-font, then set fontFamily below.
+                // Example:
+                //   import { useFonts, Cinzel_600SemiBold } from '@expo-google-fonts/cinzel';
+                //   const [fontsLoaded] = useFonts({ Cinzel_600SemiBold });
+                //   ... fontFamily: fontsLoaded ? 'Cinzel_600SemiBold' : undefined
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontWeight: '600',
+                    // fontFamily: 'Cinzel_600SemiBold', // uncomment after loading fonts
+                    fontSize: Math.max(14, pos.size * 0.38),
+                    textShadowColor: 'rgba(0,0,0,0.35)',
+                    textShadowRadius: 3,
+                  }}
+                >
+                  {i + 1}
+                </Text>
+              )}
             </View>
             {completedDays?.includes(i + 1) && (
               <View style={{ position: 'absolute', top: -6, right: -6, backgroundColor: '#16a34a', borderRadius: 999, paddingHorizontal: 6, paddingVertical: 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' }}>
