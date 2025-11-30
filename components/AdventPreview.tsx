@@ -1,0 +1,82 @@
+import React, { useCallback, useMemo, useState } from 'react';
+import { ImageBackground, Image, Pressable, Text, View, LayoutChangeEvent } from 'react-native';
+
+type Props = {
+  backgroundKey: string; // e.g., background_1, background_vertical_2
+  styleKey: string; // e.g., number_box_v1
+  totalDays: number; // 1..30
+  onPressDay?: (day: number) => void;
+};
+
+const backgroundMap: Record<string, any> = {
+  background_1: require('../assets/background_1.jpg'),
+  background_2: require('../assets/background_2.jpg'),
+  background_3: require('../assets/background_3.jpg'),
+  background_vertical_1: require('../assets/background_vertical_1.jpg'),
+  background_vertical_2: require('../assets/background_vertical_2.jpg'),
+  background_vertical_3: require('../assets/background_vertical_3.jpg'),
+};
+
+const numberBoxMap: Record<string, any> = {
+  number_box_v1: require('../assets/number_box_1.png'),
+};
+
+export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay }: Props) {
+  const [layout, setLayout] = useState({ w: 0, h: 0 });
+  const onLayout = useCallback((e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setLayout({ w: width, h: height });
+  }, []);
+
+  const cols = 4;
+  const rows = Math.ceil(Math.max(1, Math.min(30, totalDays)) / cols);
+  const icon = numberBoxMap[styleKey] ?? numberBoxMap.number_box_v1;
+
+  const boxes = useMemo(() => Array.from({ length: totalDays }, (_, i) => i + 1), [totalDays]);
+
+  const positions = useMemo(() => {
+    if (!layout.w || !layout.h) return [] as { left: number; top: number; size: number }[];
+    // 背景の向きに応じて余白・密度を調整
+    const isVertical = /vertical/i.test(backgroundKey);
+    const marginH = layout.w * (isVertical ? 0.05 : 0.08);
+    const marginV = layout.h * (isVertical ? 0.06 : 0.12);
+    const gridW = layout.w - marginH;
+    const gridH = layout.h - marginV;
+    const cellW = gridW / cols;
+    const cellH = gridH / rows;
+    const size = Math.min(cellW, cellH) * (isVertical ? 0.9 : 0.85); // タップ領域を広めに
+    const offsetX = (layout.w - cols * cellW) / 2 + (cellW - size) / 2;
+    const offsetY = (layout.h - rows * cellH) / 2 + (cellH - size) / 2;
+    return boxes.map((day) => {
+      const idx = day - 1;
+      const r = Math.floor(idx / cols);
+      const c = idx % cols;
+      return {
+        left: c * cellW + offsetX,
+        top: r * cellH + offsetY,
+        size,
+      };
+    });
+  }, [layout, rows, cols, boxes]);
+
+  const bg = backgroundMap[backgroundKey] ?? backgroundMap.background_1;
+
+  return (
+    <View style={{ flex: 1, borderRadius: 16, overflow: 'hidden' }} onLayout={onLayout}>
+      <ImageBackground source={bg} resizeMode="cover" style={{ flex: 1 }}>
+        {positions.map((pos, i) => (
+          <Pressable
+            key={i}
+            style={{ position: 'absolute', left: pos.left, top: pos.top, width: pos.size, height: pos.size }}
+            onPress={() => onPressDay?.(i + 1)}
+          >
+            <Image source={icon} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+            <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ color: '#fff', fontWeight: '800', fontSize: Math.max(14, pos.size * 0.3), textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 4 }}>{i + 1}</Text>
+            </View>
+          </Pressable>
+        ))}
+      </ImageBackground>
+    </View>
+  );
+}

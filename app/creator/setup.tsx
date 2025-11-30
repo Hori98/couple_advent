@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { useRelationship } from '../../hooks/useRelationship';
+import { AdventPreview } from '../../components/AdventPreview';
 
 const REL_KEY = 'relationship_id';
 
@@ -11,16 +12,20 @@ export default function CreatorSetup() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [days, setDays] = useState<14 | 24 | 30>(24);
+  const [backgroundKey, setBackgroundKey] = useState<string>('background_1');
+  const [styleKey, setStyleKey] = useState<string>('number_box_v1');
   const [saving, setSaving] = useState(false);
   const { clear } = useRelationship();
 
   const create = async () => {
     try {
       setSaving(true);
-      // Use single RPC to avoid RLS update issues and schema cache mismatches
+      // 新RPC（タイトル/日数/背景/スタイル）
       const { data: rel, error } = await supabase.rpc('create_relationship_with_days', {
         p_title: title,
         p_total_days: days,
+        p_background_key: backgroundKey,
+        p_style_key: styleKey,
       });
       if (error) throw error;
       await AsyncStorage.setItem(REL_KEY, rel.id);
@@ -33,9 +38,10 @@ export default function CreatorSetup() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0f172a', padding: 24 }}>
-      <Text style={{ color: '#fff', fontSize: 28, fontWeight: '800', marginBottom: 4 }}>🎄 新しいアドベント</Text>
-      <Text style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 16 }}>タイトルと日数を決めましょう</Text>
+    <View style={{ flex: 1, backgroundColor: '#0f172a' }}>
+      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 32 }}>
+        <Text style={{ color: '#fff', fontSize: 28, fontWeight: '800', marginBottom: 4 }}>🎄 アドベントを作成</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 16 }}>タイトル・背景・スタイル・日数を選択し、プレビューを確認</Text>
 
       <Text style={{ color: '#fff', marginBottom: 8 }}>タイトル（任意）</Text>
       <TextInput
@@ -45,6 +51,30 @@ export default function CreatorSetup() {
         placeholderTextColor="#94a3b8"
         style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', marginBottom: 16 }}
       />
+
+      <Text style={{ color: '#fff', marginBottom: 8 }}>背景</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+        {['background_1','background_2','background_3','background_vertical_1','background_vertical_2','background_vertical_3'].map((k) => {
+          const active = backgroundKey === k;
+          return (
+            <TouchableOpacity key={k} onPress={() => setBackgroundKey(k)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}>
+              <Text style={{ color: active ? '#16a34a' : '#fff' }}>{k.replace('background','bg')}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      <Text style={{ color: '#fff', marginBottom: 8 }}>スタイル</Text>
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+        {['number_box_v1'].map((k) => {
+          const active = styleKey === k;
+          return (
+            <TouchableOpacity key={k} onPress={() => setStyleKey(k)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}>
+              <Text style={{ color: active ? '#16a34a' : '#fff' }}>番号ボックス v1</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       <Text style={{ color: '#fff', marginBottom: 8 }}>日数</Text>
       <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
@@ -62,38 +92,43 @@ export default function CreatorSetup() {
         })}
       </View>
 
-      <TouchableOpacity disabled={saving} onPress={create} style={{ backgroundColor: '#16a34a', paddingVertical: 16, borderRadius: 12 }}>
-        <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>{saving ? '作成中...' : '作成する'}</Text>
-      </TouchableOpacity>
+        <View style={{ height: 360, borderRadius: 16, overflow: 'hidden', marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+          <AdventPreview backgroundKey={backgroundKey} styleKey={styleKey} totalDays={days} onPressDay={() => {}} />
+        </View>
 
-      <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 12 }}>
-        エラーが出る場合は、SupabaseのSQLで pgcrypto 拡張を有効化してください（create extension if not exists pgcrypto;）。
-      </Text>
+        <TouchableOpacity disabled={saving} onPress={create} style={{ backgroundColor: '#16a34a', paddingVertical: 16, borderRadius: 12 }}>
+          <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>{saving ? '作成中...' : '作成する'}</Text>
+        </TouchableOpacity>
 
-      <View style={{ marginTop: 24, gap: 12 }}>
-        <TouchableOpacity
-          onPress={async () => {
-            try {
-              await supabase.auth.signOut();
-              await clear();
-              router.replace('/auth');
-            } catch {}
-          }}
-          style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 12, borderRadius: 12 }}
-        >
-          <Text style={{ textAlign: 'center', color: '#fff' }}>サインアウト（開発用）</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={async () => {
-            try {
-              await clear();
-            } catch {}
-          }}
-          style={{ backgroundColor: 'rgba(255,255,255,0.08)', paddingVertical: 12, borderRadius: 12 }}
-        >
-          <Text style={{ textAlign: 'center', color: '#fff' }}>関係IDをクリア（開発用）</Text>
-        </TouchableOpacity>
-      </View>
+        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 12 }}>
+          作成後はプレビュー上の番号をタップしてコンテンツを登録できます。
+        </Text>
+
+        <View style={{ marginTop: 24, gap: 12 }}>
+          <TouchableOpacity
+            onPress={async () => {
+              try {
+                await supabase.auth.signOut();
+                await clear();
+                router.replace('/auth');
+              } catch {}
+            }}
+            style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 12, borderRadius: 12 }}
+          >
+            <Text style={{ textAlign: 'center', color: '#fff' }}>サインアウト（開発用）</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={async () => {
+              try {
+                await clear();
+              } catch {}
+            }}
+            style={{ backgroundColor: 'rgba(255,255,255,0.08)', paddingVertical: 12, borderRadius: 12 }}
+          >
+            <Text style={{ textAlign: 'center', color: '#fff' }}>関係IDをクリア（開発用）</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }

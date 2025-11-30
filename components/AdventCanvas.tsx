@@ -1,7 +1,7 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { View, ImageBackground, Image, Pressable, LayoutChangeEvent } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, ImageBackground, Image, Pressable, LayoutChangeEvent, Text } from 'react-native';
 import { MotiView } from 'moti';
-import { ContentModal } from './ContentModal';
+import { ContentModal, Content } from './ContentModal';
 
 type Hotspot = {
   day: number;
@@ -15,12 +15,14 @@ type Hotspot = {
 type Props = {
   background: any; // require()
   hotspots: Hotspot[];
+  onOpenContent?: (day: number) => Promise<Content | null>;
 };
 
-export function AdventCanvas({ background, hotspots }: Props) {
+export function AdventCanvas({ background, hotspots, onOpenContent }: Props) {
   const [layout, setLayout] = useState({ w: 0, h: 0 });
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [content, setContent] = useState<Content | null>(null);
 
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -45,10 +47,22 @@ export function AdventCanvas({ background, hotspots }: Props) {
       {/* 背景をより大きく表示: coverで全面、中心トリミング */}
       <ImageBackground source={background} resizeMode="cover" style={{ flex: 1 }}>
         {positions.map((pos, i) => (
-          <Pressable key={i} style={{ position: 'absolute', left: pos.left, top: pos.top, width: pos.width, height: pos.height }} onPress={() => {
-            setOpenIdx(i);
-            setModalVisible(true);
-          }}>
+          <Pressable
+            key={i}
+            style={{ position: 'absolute', left: pos.left, top: pos.top, width: pos.width, height: pos.height }}
+            onPress={async () => {
+              setOpenIdx(i);
+              // Try to fetch real content if provided; fallback to icon preview
+              let c: Content | null = null;
+              try {
+                if (onOpenContent) c = await onOpenContent(hotspots[i].day);
+              } catch {}
+              setContent(
+                c ?? { type: 'image', uri: hotspots[i].icon }
+              );
+              setModalVisible(true);
+            }}
+          >
             <MotiView from={{ scale: 1 }} animate={{ scale: 1 }} transition={{ type: 'timing', duration: 300 }} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <Image source={hotspots[i].icon} style={{ width: pos.width, height: pos.height }} resizeMode="contain" />
               {/* 日付番号バッジ */}
@@ -65,9 +79,13 @@ export function AdventCanvas({ background, hotspots }: Props) {
         <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 250 }} style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)' }} />
       )}
 
-      {/* コンテンツ表示（仮: 画像としてオーナメントを表示） */}
-      {active && (
-        <ContentModal visible={modalVisible} onClose={() => { setModalVisible(false); setOpenIdx(null); }} content={{ type: 'image', uri: active.icon }} />
+      {/* コンテンツ表示（実データ or 仮画像） */}
+      {active && content && (
+        <ContentModal
+          visible={modalVisible}
+          onClose={() => { setModalVisible(false); setOpenIdx(null); setContent(null); }}
+          content={content}
+        />
       )}
     </View>
   );

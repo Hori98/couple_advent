@@ -23,6 +23,7 @@ export default function RootLayout() {
           <Stack.Screen name="calendar" options={{ title: 'Advent Calendar' }} />
           <Stack.Screen name="creator/index" options={{ title: 'Creator' }} />
           <Stack.Screen name="creator/setup" options={{ title: 'Setup' }} />
+          <Stack.Screen name="creator/preview" options={{ title: 'Preview' }} />
           <Stack.Screen name="creator/share" options={{ title: 'Share' }} />
           <Stack.Screen name="door/[day]" options={{ title: 'Door' }} />
         </Stack>

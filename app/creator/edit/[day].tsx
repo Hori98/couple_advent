@@ -21,6 +21,8 @@ export default function EditDayScreen() {
   const [linkUrl, setLinkUrl] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [imageMime, setImageMime] = useState<string | null>(null);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -28,8 +30,14 @@ export default function EditDayScreen() {
       Alert.alert('権限が必要です', 'フォトライブラリへのアクセスを許可してください');
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
-    if (!result.canceled) setImageUri(result.assets[0].uri);
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.9, base64: true });
+    if (!result.canceled) {
+      const a = result.assets[0];
+      setImageUri(a.uri);
+      setImageBase64(a.base64 ?? null);
+      // @ts-expect-error RN SDK may or may not expose mimeType
+      setImageMime((a as any).mimeType ?? null);
+    }
   };
 
   const onSave = async () => {
@@ -38,7 +46,7 @@ export default function EditDayScreen() {
       setSaving(true);
       let image_path: string | null = null;
       if (type === 'image' && imageUri) {
-        image_path = await uploadImageForDay({ relationshipId, day: dayNumber, uri: imageUri });
+        image_path = await uploadImageForDay({ relationshipId, day: dayNumber, uri: imageUri, base64: imageBase64 ?? undefined, mimeType: imageMime });
       }
       await upsert({
         relationship_id: relationshipId,
@@ -52,8 +60,14 @@ export default function EditDayScreen() {
         updated_at: '' as any,
         id: '' as any,
       } as any);
-      Alert.alert('保存しました');
-      router.back();
+      Alert.alert(
+        '保存しました',
+        '',
+        [
+          { text: 'プレビューを見る', onPress: () => router.push(`/door/${dayNumber}`) },
+          { text: '閉じる', style: 'cancel', onPress: () => router.back() },
+        ]
+      );
     } catch (e: any) {
       Alert.alert('保存に失敗しました', e.message);
     } finally {

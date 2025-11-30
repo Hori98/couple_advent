@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Share, Alert, TextInput, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Share, Alert, TextInput, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useRelationship } from '../../hooks/useRelationship';
 import { supabase } from '../../lib/supabase';
-import { AdventCanvas } from '../../components/AdventCanvas';
 import { LayoutFrame } from '../../components/LayoutFrame';
+import { AdventPreview } from '../../components/AdventPreview';
 
-const days = Array.from({ length: 24 }, (_, i) => i + 1);
+function buildDays(n: number) { return Array.from({ length: n }, (_, i) => i + 1); }
 
 export default function CreatorHome() {
   const router = useRouter();
@@ -14,11 +14,17 @@ export default function CreatorHome() {
   const [linkCode, setLinkCode] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [totalDays, setTotalDays] = useState<number>(24);
+  const [backgroundKey, setBackgroundKey] = useState<string>('background_1');
+  const [styleKey, setStyleKey] = useState<string>('number_box_v1');
   const [savingDays, setSavingDays] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [finishOpen, setFinishOpen] = useState(false);
   const [finishStep, setFinishStep] = useState<'choice'|'passcode'|'done'>('choice');
   const [finishLink, setFinishLink] = useState<string | null>(null);
+  const [designOpen, setDesignOpen] = useState(false);
+  const [tmpBackground, setTmpBackground] = useState<string>('background_1');
+  const [tmpStyle, setTmpStyle] = useState<string>('number_box_v1');
+  const [tmpDays, setTmpDays] = useState<number>(24);
 
   useEffect(() => {
     // 初期ロード中（null）のときはリダイレクトしない
@@ -30,7 +36,7 @@ export default function CreatorHome() {
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16 }}>
       <View>
         <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>コンテンツ登録</Text>
-        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>編集したい日を選んでください</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>プレビュー上の番号をタップして編集</Text>
       </View>
       <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>{totalDays} days</Text>
     </View>
@@ -47,77 +53,118 @@ export default function CreatorHome() {
     </View>
   );
 
+  // 初期設定をDBから取得
+  useEffect(() => {
+    (async () => {
+      if (!relationshipId) return;
+      try {
+        const { data, error } = await supabase
+          .from('relationships')
+          .select('total_days, background_key, style_key')
+          .eq('id', relationshipId)
+          .single();
+        if (!error && data) {
+          if (data.total_days) setTotalDays(data.total_days);
+          if (data.background_key) setBackgroundKey(data.background_key);
+          if (data.style_key) setStyleKey(data.style_key);
+          setTmpDays(data.total_days ?? 24);
+          setTmpBackground(data.background_key ?? 'background_1');
+          setTmpStyle(data.style_key ?? 'number_box_v1');
+        }
+      } catch {}
+    })();
+  }, [relationshipId]);
+
   return (
     <LayoutFrame header={Header} footer={Footer} backgroundColor="#0f172a">
 
-      {/* AdventCanvas の仮当て込み（背景 + オーナメント1件） */}
-      <View style={{ flex: 1 }}>
-        <AdventCanvas
-        background={require('../../assets/christmas-tree_background.png')}
-        hotspots={[
-          { day: 1, x: 0.5 - 0.08, y: 0.35, w: 0.16, h: 0.16, icon: require('../../assets/christmas-decoration_1.png') },
-        ]}
+      {/* 統合プレビュー（背景・スタイル・日数）: メイン領域いっぱい（横余白もフルブリード） */}
+      <View style={{ flex: 1, borderRadius: 0, overflow: 'hidden', marginHorizontal: -16 }}>
+        <AdventPreview
+          backgroundKey={backgroundKey}
+          styleKey={styleKey}
+          totalDays={totalDays}
+          onPressDay={(day) => router.push(`/creator/edit/${day}`)}
         />
-      </View>
-
-      <View style={{ flexDirection: 'row', gap: 12, marginTop: 12, marginBottom: 12 }}>
-        {[14,24,30].map((d) => (
-          <TouchableOpacity
-            key={d}
-            onPress={async () => {
-              if (!relationshipId) return;
-              try {
-                setSavingDays(true);
-                // 要: RLSでrelationshipsのupdate許可（後述SQL）
-                const { error } = await supabase
-                  .from('relationships')
-                  .update({ total_days: d })
-                  .eq('id', relationshipId);
-                if (error) throw error;
-                setTotalDays(d);
-              } catch (e: any) {
-                Alert.alert('更新に失敗しました', e.message);
-              } finally {
-                setSavingDays(false);
-              }
-            }}
-            style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: totalDays === d ? '#fff' : 'rgba(255,255,255,0.1)' }}
-          >
-            <Text style={{ color: totalDays === d ? '#16a34a' : '#fff', fontWeight: totalDays === d ? '700' as const : '400' }}>{d}日</Text>
+        {/* デザイン設定 FAB */}
+        <View style={{ position: 'absolute', right: 16, bottom: 16 }}>
+          <TouchableOpacity onPress={() => setDesignOpen(true)} style={{ backgroundColor: '#16a34a', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 999 }}>
+            <Text style={{ color: '#fff', fontWeight: '700' }}>デザイン</Text>
           </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* 共有してシェア（即時）は削除。完了モーダルからのみ共有 */}
-
-      <View className="bg-white/5 rounded-xl p-3 border border-white/10 mb-3">
-        <Text className="text-white mb-2">合言葉（任意・共有リンク保護）</Text>
-        <View className="flex-row items-center gap-2">
-          <TextInput
-            value={passcode}
-            onChangeText={setPasscode}
-            placeholder="合言葉（未設定可）"
-            placeholderTextColor="#94a3b8"
-            className="flex-1 bg-white/10 text-white px-4 py-3 rounded-xl border border-white/20"
-            secureTextEntry
-          />
         </View>
       </View>
-      <FlatList
-        data={days}
-        keyExtractor={(d) => String(d)}
-        numColumns={4}
-        columnWrapperStyle={{ gap: 12 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={{ flex: 1 / 4 }} onPress={() => router.push(`/creator/edit/${item}`)}>
-            <View style={{ aspectRatio: 1, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.9)' }}>
-              <Text style={{ fontSize: 20, fontWeight: '800', color: '#16a34a' }}>{item}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
 
+      {/* デザイン設定モーダル */}
+      <Modal visible={designOpen} transparent animationType="fade" onRequestClose={() => setDesignOpen(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: 'rgba(15,23,42,0.98)', borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+            <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 12 }}>デザイン設定</Text>
+            <Text style={{ color: '#fff', marginBottom: 8 }}>背景</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+              {['background_1','background_2','background_3','background_vertical_1','background_vertical_2','background_vertical_3'].map((k) => {
+                const active = tmpBackground === k;
+                return (
+                  <TouchableOpacity key={k} onPress={() => setTmpBackground(k)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}>
+                    <Text style={{ color: active ? '#16a34a' : '#fff' }}>{k.replace('background','bg')}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <Text style={{ color: '#fff', marginBottom: 8 }}>スタイル</Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              {['number_box_v1'].map((k) => {
+                const active = tmpStyle === k;
+                return (
+                  <TouchableOpacity key={k} onPress={() => setTmpStyle(k)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}>
+                    <Text style={{ color: active ? '#16a34a' : '#fff' }}>番号ボックス v1</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <Text style={{ color: '#fff', marginBottom: 8 }}>日数</Text>
+            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
+              {[14,24,30].map((d) => {
+                const active = tmpDays === d;
+                return (
+                  <TouchableOpacity key={d} onPress={() => setTmpDays(d)} style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}>
+                    <Text style={{ color: active ? '#16a34a' : '#fff', fontWeight: active ? '700' as const : '400' }}>{d}日</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* プレビューの即時反映: 下の行で現在値を更新 */}
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                onPress={async () => {
+                  if (!relationshipId) { setDesignOpen(false); return; }
+                  try {
+                    const { error } = await supabase
+                      .from('relationships')
+                      .update({ background_key: tmpBackground, style_key: tmpStyle, total_days: tmpDays })
+                      .eq('id', relationshipId);
+                    if (error) throw error;
+                    setBackgroundKey(tmpBackground);
+                    setStyleKey(tmpStyle);
+                    setTotalDays(tmpDays);
+                    setDesignOpen(false);
+                  } catch (e: any) {
+                    Alert.alert('保存に失敗しました', e.message);
+                  }
+                }}
+                style={{ flex: 1, backgroundColor: '#16a34a', paddingVertical: 12, borderRadius: 12 }}
+              >
+                <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '700' }}>保存</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => { setTmpBackground(backgroundKey); setTmpStyle(styleKey); setTmpDays(totalDays); setDesignOpen(false); }} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 12, borderRadius: 12 }}>
+                <Text style={{ color: '#fff', textAlign: 'center' }}>キャンセル</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       {/* 作成完了フローティングボタン */}
       {/* Footerで完了ボタンを固定表示しているため削除 */}
 
@@ -178,10 +225,29 @@ export default function CreatorHome() {
               <View>
                 <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 8 }}>共有リンク</Text>
                 <Text style={{ color: 'rgba(255,255,255,0.8)', marginBottom: 12 }}>{finishLink}</Text>
-                {/* コピーは後でexpo-clipboard導入時に対応。今は共有のみ */}
-                <TouchableOpacity onPress={async () => { if (finishLink) await Share.share({ message: `アドベントカレンダー🎄\n${finishLink}` }); }} style={{ backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 12, borderRadius: 12, marginBottom: 8 }}>
-                  <Text style={{ color: '#fff', textAlign: 'center' }}>共有</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity
+                    onPress={async () => {
+                      if (!finishLink) return;
+                      try {
+                        const Clipboard = (await import('expo-clipboard')) as any;
+                        if (Clipboard?.setStringAsync) {
+                          await Clipboard.setStringAsync(finishLink);
+                          Alert.alert('コピーしました');
+                          return;
+                        }
+                      } catch {}
+                      // Fallback: system share
+                      await Share.share({ message: `アドベントカレンダー🎄\n${finishLink}` });
+                    }}
+                    style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 12, borderRadius: 12, marginBottom: 8 }}
+                  >
+                    <Text style={{ color: '#fff', textAlign: 'center' }}>コピー</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={async () => { if (finishLink) await Share.share({ message: `アドベントカレンダー🎄\n${finishLink}` }); }} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', paddingVertical: 12, borderRadius: 12, marginBottom: 8 }}>
+                    <Text style={{ color: '#fff', textAlign: 'center' }}>共有</Text>
+                  </TouchableOpacity>
+                </View>
                 <TouchableOpacity onPress={() => setFinishOpen(false)} style={{ backgroundColor: '#16a34a', paddingVertical: 12, borderRadius: 12 }}>
                   <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '700' }}>閉じる</Text>
                 </TouchableOpacity>

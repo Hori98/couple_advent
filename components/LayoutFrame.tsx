@@ -22,7 +22,7 @@ export function LayoutFrame({
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor }}>
       {/* Header fixed */}
-      <View style={{ height: header ? headerHeight : 0, justifyContent: 'center' }}>
+      <View style={{ height: header ? headerHeight : 0, justifyContent: 'center', zIndex: 1 }}>
         {header}
       </View>
       {/* Main content area (reserved space for footer) */}
@@ -31,11 +31,10 @@ export function LayoutFrame({
       </View>
       {/* Footer fixed */}
       {footer && (
-        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: footerHeight, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, backgroundColor }}>
+        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: footerHeight, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, backgroundColor, zIndex: 1 }}>
           {footer}
         </View>
       )}
     </SafeAreaView>
   );
 }
-
