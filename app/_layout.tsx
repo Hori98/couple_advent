@@ -29,7 +29,7 @@ export default function RootLayout() {
           <Stack.Screen name="creator/preview" options={{ title: 'Preview' }} />
           <Stack.Screen name="preview" options={{ title: '受け手プレビュー' }} />
           <Stack.Screen name="creator/share" options={{ title: 'Share' }} />
-          <Stack.Screen name="door/[day]" options={{ title: 'Door' }} />
+          <Stack.Screen name="door/[day]" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="light" />
       </SafeAreaView>
