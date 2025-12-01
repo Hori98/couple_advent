@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { View, Text, Image, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import { useRelationship } from '../../hooks/useRelationship';
 import { useEntries, Entry } from '../../hooks/useEntries';
@@ -19,6 +19,7 @@ const ANIMATION_DURATION = 1100;
 
 export default function DoorDetail() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { day, preview } = useLocalSearchParams<{ day: string; preview?: string }>();
   const dayNumber = useMemo(() => Number(day), [day]);
   const { relationshipId } = useRelationship();
@@ -27,6 +28,11 @@ export default function DoorDetail() {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>('loading');
   const mode: Mode = preview ? 'preview' : 'live';
+
+  // Enforce header hidden (fallback in case Stack option isn't applied)
+  useEffect(() => {
+    navigation.setOptions?.({ headerShown: false, title: '' });
+  }, [navigation]);
 
   useEffect(() => {
     let cancelled = false;
