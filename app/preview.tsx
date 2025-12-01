@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import { useRelationship } from '../hooks/useRelationship';
 import { useEntries, Entry } from '../hooks/useEntries';
@@ -71,7 +71,7 @@ export default function ReceiverPreview() {
 
       {/* Opening animation overlay */}
       {playingAnim && (
-        <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <View style={[StyleSheet.absoluteFillObject, { alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)' }]}>
           {LottieView ? (
             <LottieView source={require('../assets/gift-box_opening_animation.json')} autoPlay loop={false} style={{ width: 260, height: 260 }} />
           ) : (
