@@ -37,7 +37,13 @@ export default function DoorDetail() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (!relationshipId) return;
+      if (!relationshipId) {
+        if (mode === 'preview') {
+          // プレビューでリレーション未設定の場合も画面を進める
+          setPhase('content');
+        }
+        return;
+      }
       setPhase('loading');
       try {
         const e = await getByDay(dayNumber);
