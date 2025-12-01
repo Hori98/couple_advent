@@ -9,9 +9,21 @@ do $$ begin
   alter type content_type add value 'video';
 exception when duplicate_object then null; end $$;
 
+do $$ begin
+  alter type content_type add value 'audio';
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  alter type content_type add value 'file';
+exception when duplicate_object then null; end $$;
+
 -- 2) advent_entries additions
 alter table if exists public.advent_entries
   add column if not exists link_url text;
+alter table if exists public.advent_entries
+  drop constraint if exists advent_entries_day_check;
+alter table if exists public.advent_entries
+  add constraint advent_entries_day_check check (day between 1 and 31);
 
 -- 3) share_links: passcode setter RPC (creator only)
 create or replace function public.set_share_link_passcode(p_code text, p_passcode text)
@@ -33,7 +45,7 @@ declare sl public.share_links; begin
   end if;
 
   update public.share_links
-     set passcode_hash = case when p_passcode is null or length(p_passcode)=0 then null else crypt(p_passcode, gen_salt('bf')) end
+     set passcode_hash = case when p_passcode is null or length(p_passcode)=0 then null else extensions.crypt(p_passcode, extensions.gen_salt('bf')) end
    where id = sl.id
    returning * into sl;
   return sl;
@@ -56,7 +68,7 @@ begin
   if sl.expires_at is not null and now() >= sl.expires_at then raise exception 'Link expired'; end if;
 
   if sl.passcode_hash is not null then
-    if p_passcode is null or crypt(p_passcode, sl.passcode_hash) <> sl.passcode_hash then
+    if p_passcode is null or extensions.crypt(p_passcode, sl.passcode_hash) <> sl.passcode_hash then
       raise exception 'Passcode required or invalid';
     end if;
   end if;
@@ -73,4 +85,3 @@ begin
 
   raise exception 'This link is already claimed by someone else';
 end $$;
-

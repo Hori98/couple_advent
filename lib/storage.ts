@@ -28,12 +28,11 @@ function base64ToBytes(b64: string): Uint8Array {
 export async function uploadImageForDay(params: {
   relationshipId: string;
   day: number;
-  uri?: string;
-  base64?: string; // ImagePickerでbase64を取得した場合はこちらを優先
+  uri?: string; // RNのファイルURI（推奨）
+  base64?: string; // 予備
   mimeType?: string | null;
 }) {
   const { relationshipId, day, uri, base64, mimeType } = params;
-  let bytes: Uint8Array;
   let ext = 'jpg';
   if (mimeType) {
     const guessed = mimeType.split('/')[1];
@@ -43,30 +42,45 @@ export async function uploadImageForDay(params: {
     if (uext) ext = uext;
   }
 
-  if (base64) {
-    bytes = base64ToBytes(base64);
-  } else if (uri) {
-    // fetch(uri) は一部環境で失敗することがあるため、base64を推奨
-    const res = await fetch(uri);
-    const ab = await res.arrayBuffer();
-    bytes = new Uint8Array(ab);
-  } else {
-    throw new Error('No image data');
-  }
+  if (!uri && !base64) throw new Error('No image data');
 
   const fileName = `${Date.now()}.${ext}`;
-  const path = `relationships/${relationshipId}/${day}/${fileName}`;
+  const path = `relationships/${relationshipId}/${day}/images/${fileName}`;
 
-  // React NativeではBlob経由が安定
-  const blob = new Blob([bytes], { type: mimeType || `image/${ext}` });
+  // In React Native, pass a file-like object with uri/name/type to upload via FormData
+  // Prefer uri from ImagePicker; avoid Blob/ArrayBuffer in RN where not fully supported.
+  const file: any = uri
+    ? { uri, name: fileName, type: mimeType || `image/${ext}` }
+    : { uri: `data:${mimeType || `image/${ext}`};base64,${base64}`, name: fileName, type: mimeType || `image/${ext}` };
 
   const { error } = await supabase.storage
     .from('advent-media')
-    .upload(path, blob as any, {
+    .upload(path, file, {
       contentType: mimeType || `image/${ext}`,
       upsert: true,
     } as any);
 
+  if (error) throw error;
+  return path;
+}
+
+export async function uploadMediaForDay(params: {
+  relationshipId: string;
+  day: number;
+  uri: string;
+  mimeType: string;
+  kind: 'image' | 'video' | 'audio' | 'file';
+}) {
+  const { relationshipId, day, uri, mimeType, kind } = params;
+  const ext = (mimeType.split('/')[1] || 'bin').split(';')[0];
+  const fileName = `${Date.now()}.${ext}`;
+  const sub = kind === 'image' ? 'images' : kind === 'video' ? 'videos' : kind === 'audio' ? 'audios' : 'files';
+  const path = `relationships/${relationshipId}/${day}/${sub}/${fileName}`;
+
+  const file: any = { uri, name: fileName, type: mimeType };
+  const { error } = await supabase.storage
+    .from('advent-media')
+    .upload(path, file, { contentType: mimeType, upsert: true } as any);
   if (error) throw error;
   return path;
 }

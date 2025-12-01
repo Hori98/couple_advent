@@ -4,11 +4,12 @@
 - App icons and splash: verify `assets/icon.png`, `assets/adaptive-icon.png`, `assets/splash.png` match brand and sizes.
 - app.json:
   - `name`, `slug`, `scheme`（e.g., `coupleadvent`）
-  - iOS: `bundleIdentifier`
-  - Android: `package`
+  - iOS: `bundleIdentifier`（現在は仮の `com.anonymous.couple-advent`）
+  - Android: `package`（未設定なので埋める）
   - `ios.supportsTablet` の方針
   - `updates.enabled`（Expo Updates使用有無）
 - EAS projectId 設定（`DEPLOYMENT_NOTES.md` 参照）
+- Android permissions: 不要なら `RECORD_AUDIO` を削除
 
 ## Permissions / Privacy
 - iOS Info.plist（app.json の `ios.infoPlist` で追加）
@@ -21,11 +22,13 @@
 ## Supabase
 - 環境変数: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`
 - RLS/関数:
-  - 非再帰RLS: `is_member`, `is_creator`
+  - 非再帰RLS: `is_member`, `is_creator`（patch適用必須）
   - StorageパスRLS: `relationships/{rel}/{day}/...`
-  - RPC: `create_relationship_with_days(4)`, `upsert_advent_entry`, `create_share_link`, `set_share_link_passcode`, `claim_share_link`
+  - RPC: `create_relationship_with_days(4)`, `upsert_advent_entry`, `create_share_link`, `set_share_link_passcode`, `claim_share_link`, `log_open_event`
+  - 生成系: `generate_invite_code` が `extensions.gen_random_bytes` を参照（`pgcrypto` 拡張必須）
 - バケット: private `advent-media` の存在
 - スキーマリロード: 変更後 `select pg_notify('pgrst','reload schema');`
+- 手順: `docs/SUPABASE_SETUP.md` に SQL順序・バケット・Auth を明文化（12/03 pgcryptoパッチも含む）
 
 ## QA Checklist
 - 作成:

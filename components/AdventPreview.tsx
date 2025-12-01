@@ -115,10 +115,10 @@ export function AdventPreview({ backgroundKey, styleKey, totalDays, onPressDay, 
                 //   ... fontFamily: fontsLoaded ? 'Cinzel_600SemiBold' : undefined
                 <Text
                   style={{
-                    color: '#fff',
-                    fontWeight: '600',
+                    color: '#d4af37',
+                    fontWeight: '700',
                     fontFamily: 'Cinzel_600SemiBold',
-                    fontSize: Math.max(14, pos.size * 0.38),
+                    fontSize: Math.max(14, pos.size * 0.4),
                     textShadowColor: 'rgba(0,0,0,0.35)',
                     textShadowRadius: 3,
                   }}

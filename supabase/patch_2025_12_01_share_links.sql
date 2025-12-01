@@ -16,7 +16,7 @@ begin
 
   -- generate unique short code
   loop
-    v_code := upper(substr(encode(gen_random_bytes(8), 'hex'), 1, 8));
+    v_code := upper(substr(encode(extensions.gen_random_bytes(8), 'hex'), 1, 8));
     exit when not exists (select 1 from public.share_links where code = v_code);
   end loop;
 
@@ -30,4 +30,3 @@ end $$;
 grant execute on function public.create_share_link(uuid) to authenticated;
 
 select pg_notify('pgrst','reload schema');
-

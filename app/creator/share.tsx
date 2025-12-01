@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Alert, Share } from 'react-native';
 import { useRelationship } from '../../hooks/useRelationship';
 import { supabase } from '../../lib/supabase';
@@ -8,6 +8,15 @@ export default function CreatorShare() {
   const [code, setCode] = useState<string | null>(null);
   const [passcode, setPasscode] = useState('');
   const [creating, setCreating] = useState(false);
+  const [title, setTitle] = useState<string>('');
+
+  useEffect(() => {
+    (async () => {
+      if (!relationshipId) return;
+      const { data } = await supabase.from('relationships').select('title').eq('id', relationshipId).single();
+      if (data?.title) setTitle(data.title);
+    })();
+  }, [relationshipId]);
 
   const create = async () => {
     if (!relationshipId) return;
@@ -27,6 +36,9 @@ export default function CreatorShare() {
   };
 
   const deeplink = code ? `coupleadvent://share/${code}` : '';
+  const shareMessage = title
+    ? `「${title}」のアドベントカレンダー🎄\n${deeplink}`
+    : `アドベントカレンダー🎄\n${deeplink}`;
 
   return (
     <View className="flex-1 bg-christmas-night p-6">
@@ -56,7 +68,7 @@ export default function CreatorShare() {
             <TouchableOpacity
               onPress={async () => {
                 try {
-                  await Share.share({ message: `アドベントカレンダー🎄\n${deeplink}` });
+                  await Share.share({ message: shareMessage });
                 } catch {}
               }}
               className="bg-white/15 px-4 py-3 rounded-xl"

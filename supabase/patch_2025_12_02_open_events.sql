@@ -31,13 +31,17 @@ end $$;
 
 grant execute on function public.can_view_relationship(uuid) to authenticated;
 
-create policy if not exists "open_events select by viewer"
-on public.open_events for select to authenticated
-using (public.can_view_relationship(open_events.relationship_id));
+do $$ begin
+  create policy "open_events select by viewer"
+  on public.open_events for select to authenticated
+  using (public.can_view_relationship(open_events.relationship_id));
+exception when duplicate_object then null; end $$;
 
-create policy if not exists "open_events insert by viewer"
-on public.open_events for insert to authenticated
-with check (public.can_view_relationship(open_events.relationship_id));
+do $$ begin
+  create policy "open_events insert by viewer"
+  on public.open_events for insert to authenticated
+  with check (public.can_view_relationship(open_events.relationship_id));
+exception when duplicate_object then null; end $$;
 
 -- RPC to log an open event (idempotent per user/day)
 create or replace function public.log_open_event(p_relationship uuid, p_day int)
@@ -58,4 +62,3 @@ end $$;
 grant execute on function public.log_open_event(uuid, int) to authenticated;
 
 select pg_notify('pgrst','reload schema');
-

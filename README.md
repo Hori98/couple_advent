@@ -13,9 +13,10 @@ Couple Advent (Expo + Supabase)
 1) Copy `.env.example` to `.env` and set:
    - `EXPO_PUBLIC_SUPABASE_URL`
    - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-2) Install deps:
+2) Supabaseの初期化: `docs/SUPABASE_SETUP.md` に沿って SQL → バケット → Auth を設定（必須）
+3) Install deps:
    - `npm install` (or `yarn`)
-3) Start the dev server:
+4) Start the dev server:
    - `npx expo start` (recommended)
    - If you prefer global CLI: `npm i -g expo` then `expo start`
 
@@ -25,14 +26,10 @@ Couple Advent (Expo + Supabase)
 - Web: press `w` (limited)
 
 ## First Run: Supabase Setup (done once)
-1) Apply SQL in `supabase/schema.sql`（基本スキーマ/RLS/RPC）
-2) 追加パッチを適用（必要に応じて）
-   - `supabase/patch_2025_11_28.sql`（link/video型・共有パスコード）
-   - `supabase/patch_2025_11_30_rls_non_recursive.sql`（非再帰RLS + StorageパスRLS）
-   - `supabase/patch_2025_11_30_relationship_days.sql`（title/total_days/background_key/style_key + 作成RPC）
-   - `supabase/patch_2025_12_01_share_links.sql`（共有リンク作成のgen_random_bytes修正）
-3) Storageバケットを作成: private `advent-media`
-4) Auth Providers: Email（Magic Link）+ Anonymous を有効化
+詳しくは `docs/SUPABASE_SETUP.md`。サマリ:
+1) SQLを順に実行: `schema.sql` → 各patch（11/28, 11/30*2, 12/01, 12/02）
+2) Storageバケット: private `advent-media`
+3) Auth: Email(Magic Link) + Anonymous を有効化（受け手が必要）。OAuthは `coupleadvent://auth/callback` をリダイレクトに登録。
 
 ## Test Flow
 1) Creator: `/auth` → サインイン → `/creator/setup`

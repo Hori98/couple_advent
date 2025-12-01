@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Image, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Image, Alert, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useRelationship } from '../../../hooks/useRelationship';
 import { useEntries } from '../../../hooks/useEntries';
 import { uploadImageForDay } from '../../../lib/storage';
@@ -76,7 +76,9 @@ export default function EditDayScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-christmas-night p-4">
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#0f172a' }} behavior={Platform.select({ ios: 'padding', android: undefined })}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView className="flex-1 p-4" keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 120 }}>
       <Text className="text-white text-2xl font-bold mb-4">{dayNumber}日目の編集</Text>
 
       <View className="flex-row gap-3 mb-4">
@@ -142,6 +144,8 @@ export default function EditDayScreen() {
       <TouchableOpacity disabled={saving} onPress={onSave} className="mt-6 bg-christmas-green py-3 rounded-xl">
         <Text className="text-center text-white font-semibold">{saving ? '保存中...' : '保存する'}</Text>
       </TouchableOpacity>
-    </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }

@@ -18,6 +18,7 @@ export default function CreatorHome() {
   const [linkCode, setLinkCode] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [totalDays, setTotalDays] = useState<number>(24);
+  const [title, setTitle] = useState<string>('');
   const [backgroundKey, setBackgroundKey] = useState<string>('background_1');
   const [styleKey, setStyleKey] = useState<string>('box_white');
   const [savingDays, setSavingDays] = useState(false);
@@ -52,7 +53,7 @@ export default function CreatorHome() {
       <TouchableOpacity
         onPress={async () => {
           try {
-            await saveDraft({ background_key: tmpBackground, style_key: tmpStyle, total_days: tmpDays, title: null });
+            await saveDraft({ background_key: tmpBackground, style_key: tmpStyle, total_days: tmpDays, title: title || null });
             setDrafts(await getDrafts());
             Alert.alert('一時保存しました');
           } catch (e:any) { Alert.alert('一時保存に失敗しました', e.message); }
@@ -97,10 +98,11 @@ export default function CreatorHome() {
       try {
         const { data, error } = await supabase
           .from('relationships')
-          .select('total_days, background_key, style_key')
+          .select('title, total_days, background_key, style_key')
           .eq('id', relationshipId)
           .single();
         if (!error && data) {
+          if (data.title) setTitle(data.title);
           if (data.total_days) setTotalDays(data.total_days);
           if (data.background_key) setBackgroundKey(data.background_key);
           if (data.style_key) setStyleKey(data.style_key);

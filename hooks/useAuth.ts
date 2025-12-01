@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import * as Linking from 'expo-linking';
 import { supabase } from '../lib/supabase';
 
 export function useAuth() {
@@ -23,6 +24,19 @@ export function useAuth() {
     };
   }, []);
 
+  // Deep link → code exchange (OAuth / Magic Link 共通)
+  useEffect(() => {
+    const sub = Linking.addEventListener('url', async ({ url }) => {
+      try {
+        await supabase.auth.exchangeCodeForSession(url);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('exchangeCodeForSession error:', (e as any)?.message ?? e);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
   const signInWithOtp = useCallback(async (email: string) => {
     setError(null);
     const { error: err } = await supabase.auth.signInWithOtp({
@@ -38,6 +52,25 @@ export function useAuth() {
     }
     setEmailSent(email);
     return true;
+  }, []);
+
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'apple' | 'twitter') => {
+    setError(null);
+    const redirectTo = 'coupleadvent://auth/callback';
+    try {
+      const { data, error: err } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo } });
+      if (err) throw err;
+      // In React Native, we must open the returned URL ourselves
+      const url = (data as any)?.url as string | undefined;
+      if (url) {
+        await Linking.openURL(url);
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn('No OAuth URL returned');
+      }
+    } catch (e: any) {
+      setError(e?.message || 'OAuth sign-in failed');
+    }
   }, []);
 
   const verifyEmailOtp = useCallback(async (email: string, token: string) => {
@@ -75,5 +108,5 @@ export function useAuth() {
     await supabase.auth.signOut();
   }, []);
 
-  return { loading, session, emailSent, error, signInWithOtp, verifyEmailOtp, signInAnonymously, signOut };
+  return { loading, session, emailSent, error, signInWithOtp, verifyEmailOtp, signInAnonymously, signOut, signInWithOAuth };
 }

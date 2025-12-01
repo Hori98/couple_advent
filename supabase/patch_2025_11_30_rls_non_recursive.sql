@@ -33,6 +33,7 @@ grant execute on function public.is_creator(uuid) to authenticated;
 
 -- relationship_members SELECT policy via function (non-recursive)
 drop policy if exists "members select same relationship" on public.relationship_members;
+drop policy if exists "members select same relationship (no-recursive)" on public.relationship_members;
 create policy "members select same relationship (no-recursive)"
 on public.relationship_members for select to authenticated
 using (
@@ -41,6 +42,7 @@ using (
 
 -- relationships UPDATE policy via function (creator only)
 drop policy if exists "relationships update by creator" on public.relationships;
+drop policy if exists "relationships update by creator (fn)" on public.relationships;
 create policy "relationships update by creator (fn)"
 on public.relationships for update to authenticated
 using (public.is_creator(relationships.id))
@@ -52,6 +54,9 @@ with check (public.is_creator(relationships.id));
 drop policy if exists "storage read by members" on storage.objects;
 drop policy if exists "storage insert by members" on storage.objects;
 drop policy if exists "storage delete by creator" on storage.objects;
+drop policy if exists "storage read by members (path)" on storage.objects;
+drop policy if exists "storage insert by members (path)" on storage.objects;
+drop policy if exists "storage delete by creator (path)" on storage.objects;
 
 create policy "storage read by members (path)"
 on storage.objects for select to authenticated
@@ -79,4 +84,3 @@ using (
 
 -- Ask PostgREST to reload the schema after applying
 select pg_notify('pgrst','reload schema');
-

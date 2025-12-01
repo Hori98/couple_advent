@@ -5,6 +5,8 @@ export type Content =
   | { type: 'text'; text: string }
   | { type: 'image'; uri: any }
   | { type: 'video'; uri: string }
+  | { type: 'audio'; uri: string }
+  | { type: 'file'; uri: string; name?: string }
   | { type: 'link'; title?: string; description?: string; url: string; thumbnail?: any };
 
 type Props = {
@@ -28,7 +30,20 @@ export function ContentModal({ visible, onClose, content }: Props) {
           )}
           {content.type === 'video' && (
             <View style={{ padding: 16 }}>
-              <Text style={{ color: '#fff' }}>動画は後でexpo-avで対応します（仮）。</Text>
+              <Text style={{ color: '#fff', marginBottom: 6 }}>動画（プレビュー）</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.7)' }}>このダイアログでは簡易表示です。ページ表示ではプレーヤー対応します。</Text>
+            </View>
+          )}
+          {content.type === 'audio' && (
+            <View style={{ padding: 16 }}>
+              <Text style={{ color: '#fff', marginBottom: 6 }}>音声（プレビュー）</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.7)' }}>このダイアログでは簡易表示です。ページ表示ではプレーヤー対応します。</Text>
+            </View>
+          )}
+          {content.type === 'file' && (
+            <View style={{ padding: 16 }}>
+              <Text style={{ color: '#fff', marginBottom: 6 }}>{content.name || 'ファイル'}</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.7)' }}>外部アプリで開きます。</Text>
             </View>
           )}
           {content.type === 'link' && (

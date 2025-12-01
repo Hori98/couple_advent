@@ -6,13 +6,14 @@ import { AdventTheme } from '../constants/themes';
 type Props = {
   day: number;
   unlocked: boolean;
+  opened?: boolean;
   isToday?: boolean;
   theme?: AdventTheme;
   onPress?: () => void;
 };
 
-export function DoorCard({ day, unlocked, isToday, onPress, theme }: Props) {
-  const [opened, setOpened] = useState(false);
+export function DoorCard({ day, unlocked, opened, isToday, onPress, theme }: Props) {
+  const [openedAnim, setOpenedAnim] = useState(false);
   const [wobble, setWobble] = useState(0);
 
   return (
@@ -20,7 +21,7 @@ export function DoorCard({ day, unlocked, isToday, onPress, theme }: Props) {
       activeOpacity={0.9}
       onPress={() => {
         if (unlocked) {
-          if (!opened) setOpened(true);
+          if (!openedAnim) setOpenedAnim(true);
           onPress?.();
         } else {
           setWobble((w) => w + 1);
@@ -31,8 +32,8 @@ export function DoorCard({ day, unlocked, isToday, onPress, theme }: Props) {
       <MotiView
         from={{ rotateY: '0deg', scale: 1, rotateZ: '0deg' }}
         animate={{
-          rotateY: opened ? '-160deg' : '0deg',
-          scale: opened ? 1.02 : 1,
+          rotateY: openedAnim ? '-160deg' : '0deg',
+          scale: openedAnim ? 1.02 : 1,
           rotateZ: wobble ? ['0deg', '-3deg', '3deg', '0deg'] : '0deg',
         }}
         transition={{ type: 'timing', duration: 500 }}
@@ -50,6 +51,9 @@ export function DoorCard({ day, unlocked, isToday, onPress, theme }: Props) {
           shadowRadius: 8,
         }}
       >
+        {opened && (
+          <View style={{ position: 'absolute', inset: 0, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.18)' }} />
+        )}
         {isToday && (
           <MotiView
             from={{ opacity: 0.3, scale: 0.96 }}
