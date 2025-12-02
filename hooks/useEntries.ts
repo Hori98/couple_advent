@@ -78,7 +78,12 @@ export function useEntries(relationshipId: string | null) {
         .eq('relationship_id', relationshipId)
         .eq('day', day)
         .single();
-      if (error) return null;
+      if (error) {
+        // Surface unauthorized errors during preview/debug
+        // eslint-disable-next-line no-console
+        console.warn('getByDay error', error.message);
+        return null;
+      }
       return data as Entry;
     },
     [entries, relationshipId]

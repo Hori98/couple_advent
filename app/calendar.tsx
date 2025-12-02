@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation, useFocusEffect } from 'expo-router';
 import { useAuth } from '../hooks/useAuth';
@@ -24,7 +24,7 @@ export default function CalendarScreen() {
   const router = useRouter();
   const { preview } = useLocalSearchParams<{ preview?: string }>();
   const navigation = useNavigation();
-  const { session } = useAuth();
+  const { session, loading: authLoading, signInAnonymously } = useAuth();
   const { relationshipId } = useRelationship();
   const { entries, fetchAll } = useEntries(relationshipId);
   const [totalDays, setTotalDays] = useState<number>(defaultTotal);
@@ -33,10 +33,21 @@ export default function CalendarScreen() {
   const [styleKey, setStyleKey] = useState<string>('box_white');
   const [openedDays, setOpenedDays] = useState<number[]>([]);
   const [hydrated, setHydrated] = useState<boolean>(false);
+  const attemptedAnon = useRef(false);
 
   useEffect(() => {
     if (!session && !preview) router.replace('/auth');
   }, [session, router]);
+
+  // Previewモードでセッションが無い場合は匿名サインインを試行（デバッグ用）
+  useEffect(() => {
+    if (!preview) return;
+    if (authLoading) return;
+    if (session) return;
+    if (attemptedAnon.current) return;
+    attemptedAnon.current = true;
+    signInAnonymously();
+  }, [preview, session, authLoading, signInAnonymously]);
 
   useEffect(() => {
     (async () => {
