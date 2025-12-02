@@ -10,6 +10,7 @@ import { useEntries } from '../../hooks/useEntries';
 import { saveDraft } from '../../lib/drafts';
 
 function buildDays(n: number) { return Array.from({ length: n }, (_, i) => i + 1); }
+const backgroundOptions = ['background_1','background_2','background_3','background_vertical_1','background_vertical_2','background_vertical_3'];
 
 export default function CreatorHome() {
   const router = useRouter();
@@ -127,11 +128,11 @@ export default function CreatorHome() {
             <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 12 }}>デザイン設定</Text>
             <Text style={{ color: '#fff', marginBottom: 8 }}>背景</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-              {['background_1','background_2','background_3','background_vertical_1','background_vertical_2','background_vertical_3'].map((k) => {
+              {backgroundOptions.map((k, idx) => {
                 const active = tmpBackground === k;
                 return (
                   <TouchableOpacity key={k} onPress={() => setTmpBackground(k)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}>
-                    <Text style={{ color: active ? '#16a34a' : '#fff' }}>{k.replace('background','bg')}</Text>
+                    <Text style={{ color: active ? '#16a34a' : '#fff' }}>{idx + 1}</Text>
                   </TouchableOpacity>
                 );
               })}

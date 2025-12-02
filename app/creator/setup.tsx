@@ -7,6 +7,8 @@ import { useRelationship } from '../../hooks/useRelationship';
 import { AdventPreview } from '../../components/AdventPreview';
 import { getPreviewSnapshot } from '../../lib/drafts';
 
+const backgroundOptions = ['background_1','background_2','background_3','background_vertical_1','background_vertical_2','background_vertical_3'];
+
 const REL_KEY = 'relationship_id';
 
 export default function CreatorSetup() {
@@ -70,11 +72,11 @@ export default function CreatorSetup() {
 
       <Text style={{ color: '#fff', marginBottom: 8 }}>背景</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-        {['background_1','background_2','background_3','background_vertical_1','background_vertical_2','background_vertical_3'].map((k) => {
+        {backgroundOptions.map((k, idx) => {
           const active = backgroundKey === k;
           return (
             <TouchableOpacity key={k} onPress={() => setBackgroundKey(k)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: active ? '#fff' : 'rgba(255,255,255,0.1)' }}>
-              <Text style={{ color: active ? '#16a34a' : '#fff' }}>{k.replace('background','bg')}</Text>
+              <Text style={{ color: active ? '#16a34a' : '#fff' }}>{idx + 1}</Text>
             </TouchableOpacity>
           );
         })}
