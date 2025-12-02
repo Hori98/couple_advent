@@ -21,11 +21,8 @@ export default function Index() {
       router.replace('/auth');
       return;
     }
-    if (!relationshipId) {
-      router.replace('/creator/setup');
-    } else {
-      router.replace('/creator');
-    }
+    // ログイン後はプロジェクト選択画面へ集約
+    router.replace('/projects');
   }, [loading, seen, session, relationshipId, router]);
 
   return (

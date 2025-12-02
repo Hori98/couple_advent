@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { useRelationship } from '../../hooks/useRelationship';
 import { AdventPreview } from '../../components/AdventPreview';
+import { getPreviewSnapshot } from '../../lib/drafts';
 
 const REL_KEY = 'relationship_id';
 
@@ -16,6 +17,21 @@ export default function CreatorSetup() {
   const [styleKey, setStyleKey] = useState<string>('box_white');
   const [saving, setSaving] = useState(false);
   const { clear } = useRelationship();
+
+  // プレビュー選択画面から渡された下書きを初期値として適用
+  useEffect(() => {
+    (async () => {
+      try {
+        const snap = await getPreviewSnapshot();
+        if (snap) {
+          setTitle(snap.title ?? '');
+          setDays((snap.total_days as 14 | 24 | 30) ?? 24);
+          setBackgroundKey(snap.background_key);
+          setStyleKey(snap.style_key);
+        }
+      } catch {}
+    })();
+  }, []);
 
   const create = async () => {
     try {

@@ -23,6 +23,7 @@ export default function RootLayout() {
           <Stack.Screen name="onboarding" options={{ title: 'Welcome', headerShown: true }} />
           <Stack.Screen name="auth" options={{ title: 'Sign in' }} />
           <Stack.Screen name="pair" options={{ title: 'Pair' }} />
+          <Stack.Screen name="projects" options={{ title: 'プロジェクト選択' }} />
           <Stack.Screen name="calendar" options={{ title: 'Advent Calendar' }} />
           <Stack.Screen name="creator/index" options={{ title: 'カレンダー作成' }} />
           <Stack.Screen name="creator/setup" options={{ title: 'Setup' }} />
