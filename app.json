@@ -33,17 +33,18 @@
       }
     },
     "android": {
+      "package": "com.coupleadvent.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f172a"
       },
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": []
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static"
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ba133fc1-a4f0-40ea-a828-3b0786cf7d68"
+      }
     }
   }
 }
