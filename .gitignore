@@ -19,3 +19,10 @@ web-build
 
 expo-env.d.ts
 # @end expo-cli
+
+# Apple auth secrets (local only)
+AuthKey_*.p8
+gen-apple-secret.mjs
+
+# Local secrets
+.env

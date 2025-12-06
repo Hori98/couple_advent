@@ -17,12 +17,12 @@ export default function ShareClaimScreen() {
     (async () => {
       try {
         if (!code) return;
-        setStatus('auth');
         const { data } = await supabase.auth.getSession();
         if (!data.session) {
-          const { error } = await supabase.auth.signInAnonymously();
-          if (error) throw error;
+          router.replace(`/auth?next=${encodeURIComponent(`/share/${code}`)}`);
+          return;
         }
+        setStatus('auth');
         setStatus('claim');
         const { data: claimed, error } = await supabase.rpc('claim_share_link', { p_code: String(code) });
         if (error) {
