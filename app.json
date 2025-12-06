@@ -27,7 +27,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.couple-advent",
+      "bundleIdentifier": "com.hori.coupleadvent", // 本番用に変更済み
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "画像をアップロードするために写真へのアクセス許可が必要です"
       }
