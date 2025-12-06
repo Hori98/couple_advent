@@ -4,12 +4,12 @@
 - App icons and splash: verify `assets/icon.png`, `assets/adaptive-icon.png`, `assets/splash.png` match brand and sizes.
 - app.json:
   - `name`, `slug`, `scheme`（e.g., `coupleadvent`）
-  - iOS: `bundleIdentifier`（現在は仮の `com.anonymous.couple-advent`）
-  - Android: `package`（未設定なので埋める）
+  - iOS: `bundleIdentifier`（現在は `com.anonymous.couple-advent`。本番値に差し替え）
+  - Android: `package`（設定済み: `com.coupleadvent.app`）
   - `ios.supportsTablet` の方針
   - `updates.enabled`（Expo Updates使用有無）
 - EAS projectId 設定（`DEPLOYMENT_NOTES.md` 参照）
-- Android permissions: 不要なら `RECORD_AUDIO` を削除
+- Android permissions: 不要権限は削除（`RECORD_AUDIO` 済み）
 
 ## Permissions / Privacy
 - iOS Info.plist（app.json の `ios.infoPlist` で追加）
@@ -17,7 +17,7 @@
   - `NSAppTransportSecurity`（必要なら）
 - Android Manifest（app.json の `android.permissions`）
   - ネットワーク、ストレージ読み取り（Expo既定で十分なことが多い）
-- プライバシーポリシーURL（ストア申請で必要）
+- プライバシーポリシーURL（ストア申請で必要）: `docs/PRIVACY_POLICY.md` を公開してURL登録
 
 ## Supabase
 - 環境変数: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`
@@ -54,3 +54,9 @@
 - 画像圧縮（背景JPG・ボックスPNG最適化）
 - 不要アセットの削除（参照なし）
 - Hermes（デフォルト有効）
+
+## Authメンテナンス（Apple）
+- Client secret は最大180日で期限切れ。手元の .p8/Team ID/Key ID/Service ID から再生成して Supabase Auth → Apple に貼り替える。
+- 例スクリプト（ローカル専用・コミット禁止）:
+  - `APPLE_TEAM_ID=... APPLE_KEY_ID=... APPLE_CLIENT_ID=... APPLE_P8_PATH=... node gen-apple-secret.mjs`
+- 期限切れ前に再生成する運用を作ること。
